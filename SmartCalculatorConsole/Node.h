@@ -3,35 +3,21 @@
 #include <memory>
 using namespace std;
 
-class BaseNode
-{
-private:
-	unique_ptr<BaseNode> leftChild;
-	unique_ptr<BaseNode> rightChild;
-public:
-	BaseNode() : leftChild{ nullptr }, rightChild{ nullptr } {};
-	BaseNode(unique_ptr<BaseNode> leftChild) : leftChild{ move(leftChild) } {};
-	BaseNode(unique_ptr<BaseNode> leftChild, unique_ptr<BaseNode> rightChild) : leftChild{ move(leftChild) }, rightChild{ move(rightChild) } {};
-};
+enum class Oper {None, Times, DevidedBy, Power};
 
-class OperatorNode : public BaseNode
+class Node
 {
-private:
-	string value;
 public:
-	OperatorNode(string value) : value{ value } {};
-	OperatorNode(string value, unique_ptr<BaseNode> leftChild) : value{ value }, BaseNode{move(leftChild)} {};
-	OperatorNode(string value, unique_ptr<BaseNode> leftChild, unique_ptr<BaseNode> rightChild) :BaseNode{ move(leftChild), move(rightChild) } {};
-};
-
-class VariableNode : public BaseNode
-{
-private:
+	Oper op;
 	float value;
-public:
-	VariableNode(float value) : value{ value } {};
-	VariableNode(float value, unique_ptr<BaseNode> leftChild) : value{ value }, BaseNode{ move(leftChild) } {};
-	VariableNode(float value, unique_ptr<BaseNode> leftChild, unique_ptr<BaseNode> rightChild) : value{ value }, BaseNode{ move(leftChild), move(rightChild) } {};
+	unique_ptr<Node> leftChild;
+	unique_ptr<Node> rightChild;
+
+	Node() : op{ Oper::None }, value{ 0 }, leftChild{ nullptr }, rightChild{ nullptr } {};
+	Node(Oper op, unique_ptr<Node> leftChild, unique_ptr<Node> rightChild) : op{ op }, value{ 0 }, leftChild { move(leftChild) }, rightChild{ move(rightChild) } {};
+	Node(float value, unique_ptr<Node> leftChild, unique_ptr<Node> rightChild) : op{ Oper::None }, value{ value }, leftChild{ move(leftChild) }, rightChild{ move(rightChild) } {};
+
+	bool IsOperator() { return op != Oper::None; };
 };
 
-BaseNode BuildTree(string& input);
+unique_ptr<Node> BuildTree(string& input);

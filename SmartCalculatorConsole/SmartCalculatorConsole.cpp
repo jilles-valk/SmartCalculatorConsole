@@ -16,11 +16,11 @@ int main()
     cout << "You entered: " << input << endl; 
     auto a = make_unique<string>("hello");
 
-    OperatorNode n3 = OperatorNode("*", make_unique<BaseNode>(OperatorNode("+")));
+    auto c = Node();
 
-    OperatorNode n4 = OperatorNode("*", make_unique<BaseNode>(VariableNode(1)), make_unique<BaseNode>(VariableNode(2)));
+    c.IsOperator();
 
-    string s = "1*2*45*6";
+    string s = "1*2*45*6/777";
 
     auto trunk = BuildTree(s);
 
