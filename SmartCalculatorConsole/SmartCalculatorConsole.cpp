@@ -16,13 +16,14 @@ int main()
     cout << "You entered: " << input << endl; 
     auto a = make_unique<string>("hello");
 
-    Node<int> * c1 = new Node<int>(1);
+    OperatorNode n3 = OperatorNode("*", make_unique<BaseNode>(OperatorNode("+")));
 
-    Node<int> n1 = Node<int>(1, make_unique<Node<int>>(Node<int>(1)));
+    OperatorNode n4 = OperatorNode("*", make_unique<BaseNode>(VariableNode(1)), make_unique<BaseNode>(VariableNode(2)));
 
-    Node<int> n2 = Node<int>(1, make_unique<Node<int>>(Node<int>(1)), make_unique<Node<int>>(Node<int>(2)));
+    string s = "1*2*45*6";
 
-    int i = n1.getValue();
+    auto trunk = BuildTree(s);
+
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

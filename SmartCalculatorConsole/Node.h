@@ -3,30 +3,35 @@
 #include <memory>
 using namespace std;
 
-template<typename T>
-class Node
+class BaseNode
 {
 private:
-	T value;
-	unique_ptr<Node<T>> leftChild;
-	unique_ptr<Node<T>> rightChild;
-
+	unique_ptr<BaseNode> leftChild;
+	unique_ptr<BaseNode> rightChild;
 public:
-	Node(T value) : value{value} {};
-	Node(T value, unique_ptr<Node<T>> leftChild) : value{ value }, leftChild{ move(leftChild) } {};
-	Node(T value, unique_ptr<Node<T>> leftChild, unique_ptr<Node<T>> rightChild) : value{ value }, leftChild{ move(leftChild) }, rightChild{ move(rightChild) } {};
-	T getValue() { return value; };
+	BaseNode() : leftChild{ nullptr }, rightChild{ nullptr } {};
+	BaseNode(unique_ptr<BaseNode> leftChild) : leftChild{ move(leftChild) } {};
+	BaseNode(unique_ptr<BaseNode> leftChild, unique_ptr<BaseNode> rightChild) : leftChild{ move(leftChild) }, rightChild{ move(rightChild) } {};
 };
 
-class OperatorNode : private Node<string>
+class OperatorNode : public BaseNode
 {
-//public:
-//	Node getLeftChild() { return leftChild; };
-//	Node getRightChild() { return rightChild; };
-};
-
-class VariableNode : Node<float>
-{
+private:
+	string value;
 public:
-
+	OperatorNode(string value) : value{ value } {};
+	OperatorNode(string value, unique_ptr<BaseNode> leftChild) : value{ value }, BaseNode{move(leftChild)} {};
+	OperatorNode(string value, unique_ptr<BaseNode> leftChild, unique_ptr<BaseNode> rightChild) :BaseNode{ move(leftChild), move(rightChild) } {};
 };
+
+class VariableNode : public BaseNode
+{
+private:
+	float value;
+public:
+	VariableNode(float value) : value{ value } {};
+	VariableNode(float value, unique_ptr<BaseNode> leftChild) : value{ value }, BaseNode{ move(leftChild) } {};
+	VariableNode(float value, unique_ptr<BaseNode> leftChild, unique_ptr<BaseNode> rightChild) : value{ value }, BaseNode{ move(leftChild), move(rightChild) } {};
+};
+
+BaseNode BuildTree(string& input);
