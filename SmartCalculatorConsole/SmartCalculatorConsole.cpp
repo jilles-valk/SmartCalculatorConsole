@@ -10,29 +10,52 @@ using namespace std;
 int main()
 {
     string input = "";
-    cout << "Enter input for calculation:" << endl;
-    //cin >> input;
+    std::cout << "Enter input for calculation:" << endl;
+    cin >> input;
 
-    cout << "You entered: " << input << endl; 
+    auto tree = BuildTree(input);
+
+    auto res = EvalTree(tree);
+
+    cout << input << " = " << res << endl;
+
+    Node* bp = new Node();
+    Node* op = new TNode<string>("*");
+
+    Node* op1 = new TNode<string>("*");
+
+    //auto s1 = (*op1).GetValue();
+
+    TNode<string>* opb = dynamic_cast<TNode<string>*>(op);
+
+    auto s1 = (*opb).GetValue();
+
+    Node* tb = new TNode<string>("/", new TNode<int>(1), new TNode<int>(2));
+
+    bp = tb;
+
+    Node* bp1 = tb;
+
     auto a = make_unique<string>("hello");
 
-    auto c = Node();
-
-    c.IsOperator();
-
-    string s = "1*2*45*6/777";
+    string s = "3*3*10";
 
     auto trunk = BuildTree(s);
 
+    auto d1 = EvalTree(new TNode<double>(1.5));
+
+    auto d2 = EvalTree(trunk);
+
+    s = "5+13";
+
+    trunk = BuildTree(s);
+
+    auto d3 = EvalTree(trunk);
+
+    s = "5-3-3+5-5";
+
+    trunk = BuildTree(s);
+
+    auto d4 = EvalTree(trunk);
+
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

@@ -1,23 +1,44 @@
 #pragma once
 #include <string>
 #include <memory>
+#include <utility>
+#include <iostream>
+
 using namespace std;
 
-enum class Oper {None, Times, DevidedBy, Power};
+enum class Oper {None, Times, DevidedBy, Power, Plus, Minus};
 
 class Node
 {
 public:
-	Oper op;
-	float value;
-	unique_ptr<Node> leftChild;
-	unique_ptr<Node> rightChild;
+	Node* leftChild { nullptr };
+	Node* rightChild{ nullptr };
 
-	Node() : op{ Oper::None }, value{ 0 }, leftChild{ nullptr }, rightChild{ nullptr } {};
-	Node(Oper op, unique_ptr<Node> leftChild, unique_ptr<Node> rightChild) : op{ op }, value{ 0 }, leftChild { move(leftChild) }, rightChild{ move(rightChild) } {};
-	Node(float value, unique_ptr<Node> leftChild, unique_ptr<Node> rightChild) : op{ Oper::None }, value{ value }, leftChild{ move(leftChild) }, rightChild{ move(rightChild) } {};
+	Node() : leftChild{ nullptr }, rightChild{ nullptr } {};
+	Node(Node* leftChild) : leftChild{ leftChild } {};
+	Node(Node* leftChild, Node* rightChild) : leftChild{ leftChild }, rightChild{ rightChild } {};
+	Node(Node& const source);
+	Node(Node&& source) : leftChild{ source.leftChild }, rightChild{ source.rightChild } {source.leftChild = nullptr; source.rightChild = nullptr; }
+	Node& operator=(Node& const node);
+	friend void swap(Node& b1, Node& b2);
+	~Node() { delete leftChild; delete rightChild; cout << "Deleting node" << endl; };
 
-	bool IsOperator() { return op != Oper::None; };
+	virtual void dummy() {}
 };
 
-unique_ptr<Node> BuildTree(string& input);
+template<typename T>
+class TNode : public Node
+{
+public:
+	T value;
+
+	TNode(T value) : value{ value } {};
+	TNode(T value, Node* leftChild) : value{ value }, Node{ leftChild }{};
+	TNode(T value, Node* leftChild, Node* rightChild) : value{ value }, Node{ leftChild, rightChild }{};
+
+	T GetValue() { return value; };
+};
+
+
+Node* BuildTree(string& input);
+double EvalTree(Node* const node);
