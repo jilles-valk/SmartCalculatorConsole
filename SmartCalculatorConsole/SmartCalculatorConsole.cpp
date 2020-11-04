@@ -9,15 +9,22 @@ using namespace std;
 
 int main()
 {
-    string input = "";
-    std::cout << "Enter input for calculation:" << endl;
-    cin >> input;
+    while (true)
+    {
+        string input = "";
 
-    auto tree = BuildTree(input);
+        std::cout << "Enter input for calculation:" << endl;
+        cin >> input;
 
-    auto res = EvalTree(tree);
+        if (input == "q") break;
 
-    cout << input << " = " << res << endl;
+        auto tree = BuildTree(input);
+
+        auto res = EvalTree(tree);
+
+        cout << input << " = " << res << endl;
+    }
+
 
     Node* bp = new Node();
     Node* op = new TNode<string>("*");

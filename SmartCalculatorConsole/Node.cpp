@@ -8,7 +8,17 @@ using namespace std;
 
 regex const operatorRe("\\*|\\/|\\+");
 regex const generalRe("\\*|\\/|\\+|\\d+|\\-\\d+");
-map<string, Oper> mapOper = { {"*", Oper::Times}, { "/", Oper::DevidedBy }, {"^", Oper::Power } , {"+", Oper::Plus }, {"-", Oper::Minus } };
+string const operators = "*/+-";
+map<char, Oper> mapOper = { {'*', Oper::Times}, { '/', Oper::DevidedBy }, {'^', Oper::Power } , {'+', Oper::Plus } };
+
+struct LMR
+{
+	string::iterator left;
+	string::iterator middle; 
+	string::iterator right;
+
+	LMR(string::iterator left, string::iterator middle, string::iterator right) : left{ left }, middle{ middle }, right{ right } {};
+};
 
 //copy constructor
 Node::Node(Node& const source)
@@ -52,66 +62,101 @@ void swap(Node& b1, Node& b2)
 	swap(b1.rightChild, b2.rightChild);
 };
 
-vector<string> ParseInput(string& const input)
+string ParseInput(string& const input)
 {
 	stringstream ss;
 
-	for (int i = 0; i < input.size(); i++) 
+	ss << input[0];
+
+	for (int i = 1; i < input.size(); i++) 
 	{
-		if (input[i] == '-')
+		// turn -x into + -x so that the order of adding and subtracting does not matter
+		if (input[i] == '-' && input[i - 1] != '*' && input[i - 1] != '/' && input[i - 1] != '+')
 		{
 			ss << '+';
 		}
+		//multiple -
 		ss << input[i];
 	}
 
-	string plusInput = ss.str();
+	return ss.str();
 
-	return vector<string>(
+	/*return vector<string>(
 		sregex_token_iterator(plusInput.begin(), plusInput.end(), generalRe, 0),
 		sregex_token_iterator()
-	);
+	);*/
 }
 
-vector<string>::iterator FindMiddle(vector<string>::iterator left, vector<string>::iterator right)
+
+LMR FindLMR(string::iterator& left, string::iterator& right)
 {
-	return find_if(left, right, [](string elem) {return regex_match(elem, operatorRe); });
+	bool hasOuterParentheses = true;
+	//check depth or while loop for multiple outer parentheses
+	for_each(left, right - 1, [parenthesesDepth = 0, &hasOuterParentheses](char& c) mutable {
+		if (c == '(')
+		{
+			parenthesesDepth++;
+		}
+		else if (c == ')')
+		{
+			parenthesesDepth--;
+			if (parenthesesDepth == 0)
+			{
+				hasOuterParentheses = false;
+			}
+		}});
+	hasOuterParentheses = hasOuterParentheses && *left == '(';
+
+	string::iterator opPos;
+
+	if (hasOuterParentheses)
+	{
+		left++;
+		right--;
+	}
+
+	if (*left == '(')
+	{
+		opPos = find(left + 1, right, ')') + 1;
+	}
+	else
+	{
+		opPos = find(left, right, '+');
+		if (opPos == right) 
+			opPos = find(left, right, '*');
+		if (opPos == right)  
+			opPos = find(left, right, '/');
+	}
+
+	return  LMR(left, opPos, right);
 }
 
-Node* BuildTreeRecursive(vector<string>::iterator left, vector<string>::iterator middle, vector<string>::iterator right)
+Node* BuildTreeRecursive(LMR lmr)
 {
-	if (middle == right)
+	if (lmr.middle == lmr.right)
 	{
-		return new TNode<double>(stof(*left), nullptr, nullptr);
+		return new TNode<double>(stof(string(lmr.left, lmr.right)), nullptr, nullptr);
 	}
 
-	if (regex_match(*middle, operatorRe))
-	{
-		return new TNode<Oper>(mapOper[*middle], BuildTreeRecursive(left, FindMiddle(left, middle - 1), middle - 1), BuildTreeRecursive(middle + 1, FindMiddle(middle + 1, right), right));
-	}
+	auto leftRight = lmr.middle;
+	LMR leftLMR = FindLMR(lmr.left, leftRight);
 
-	if (middle == left && middle == right)
-	{
-		return new TNode<double>(stof(*middle), nullptr, nullptr);
-	}
-	
-	if (middle == left)
-	{
-		return new TNode<double>(stof(*middle), nullptr, BuildTreeRecursive(middle++, middle += 2, left));
-	}
+	auto rightLeft = lmr.middle + 1;
+	LMR rightLMR = FindLMR(rightLeft, lmr.right);
 
-	if (middle == right)
+	if (find(begin(operators), end(operators), *lmr.middle) != end(operators))
 	{
-		return new TNode<double>(stof(*(--middle)), BuildTreeRecursive(left, middle -= 2, middle), nullptr);
+		return new TNode<Oper>(mapOper[*lmr.middle], BuildTreeRecursive(leftLMR), BuildTreeRecursive(rightLMR));
 	}
-
 }
 
 Node* BuildTree(string& input)
 {
-	auto seperatedInput = ParseInput(input);
+	auto parsedInput = ParseInput(input);
+	auto beginInput = begin(parsedInput);
+	auto endInput = end(parsedInput);
 
-	return BuildTreeRecursive(begin(seperatedInput), FindMiddle(begin(seperatedInput), end(seperatedInput)), end(seperatedInput));
+	return BuildTreeRecursive(FindLMR(beginInput, endInput));
 }
 
 double EvalTree(Node* const node)
