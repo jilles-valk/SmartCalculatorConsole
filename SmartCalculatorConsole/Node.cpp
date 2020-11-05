@@ -87,45 +87,66 @@ string ParseInput(string& const input)
 	);*/
 }
 
+string::iterator FindOperator(string::iterator& left, string::iterator& right)
+{
+	string::iterator opPos;
+	auto tempRight = right;;
+
+	string::iterator parenthesesPos = find(left, right, '(');
+	if (parenthesesPos < right)
+	{
+		tempRight = parenthesesPos;
+	}
+
+	opPos = find(left, tempRight, '+');
+	if (opPos == tempRight)
+		opPos = find(left, tempRight, '*');
+	if (opPos == tempRight)
+		opPos = find(left, tempRight, '/');
+
+	return opPos;
+}
 
 LMR FindLMR(string::iterator& left, string::iterator& right)
 {
 	bool hasOuterParentheses = true;
-	//check depth or while loop for multiple outer parentheses
-	for_each(left, right - 1, [parenthesesDepth = 0, &hasOuterParentheses](char& c) mutable {
-		if (c == '(')
+	string::iterator opPos;
+	auto tempLeft = left;
+
+	while (hasOuterParentheses && *left == '(')
+	{
+		tempLeft = left;
+		int parenthesesDepth = 0;
+
+		while (tempLeft < right - 1)
 		{
-			parenthesesDepth++;
-		}
-		else if (c == ')')
-		{
-			parenthesesDepth--;
-			if (parenthesesDepth == 0)
+			if ( *tempLeft == '(')
+			{
+				parenthesesDepth++;
+			}
+			else if (*tempLeft == ')' && --parenthesesDepth == 0)
 			{
 				hasOuterParentheses = false;
+				
+				break;
 			}
-		}});
-	hasOuterParentheses = hasOuterParentheses && *left == '(';
+			tempLeft++;
+		}
 
-	string::iterator opPos;
-
-	if (hasOuterParentheses)
-	{
-		left++;
-		right--;
+		if (hasOuterParentheses)
+		{
+			left++;
+			right--;
+		}
 	}
 
 	if (*left == '(')
 	{
-		opPos = find(left + 1, right, ')') + 1;
+		opPos = FindOperator(tempLeft, right);
 	}
 	else
 	{
-		opPos = find(left, right, '+');
-		if (opPos == right) 
-			opPos = find(left, right, '*');
-		if (opPos == right)  
-			opPos = find(left, right, '/');
+		opPos = FindOperator(left, right);
 	}
 
 	return  LMR(left, opPos, right);
@@ -173,8 +194,6 @@ double EvalTree(Node* const node)
 			return EvalTree(node->leftChild) / EvalTree(node->rightChild);
 		case Oper::Plus:
 			return EvalTree(node->leftChild) + EvalTree(node->rightChild);
-		case Oper::Minus:
-			return EvalTree(node->leftChild) - EvalTree(node->rightChild);
 		default:
 			break;
 		}
