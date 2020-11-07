@@ -42,7 +42,6 @@ int main()
     }
 
     string s = "(5*(35-(3*874)+99*89))/(5+700-3*9)";
-    //string s = "((5+3)/(5-3))*500";
 
     auto dur = TimeFunction(1000, BuildTree, s);
 
@@ -60,43 +59,4 @@ int main()
 
     auto duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count();
     cout << "Find executed in " << duration << " microseconds" << endl;
-
-    auto d4 = EvalTree(trunk.get());
-
-
-    Node* bp = new Node();
-    Node* op = new TNode<string>("*");
-
-    Node* op1 = new TNode<string>("*");
-
-    //auto s1 = (*op1).GetValue();
-
-    TNode<string>* opb = dynamic_cast<TNode<string>*>(op);
-
-    auto s1 = (*opb).GetValue();
-
-    Node* tb = new TNode<string>("/", new TNode<int>(1), new TNode<int>(2));
-
-    bp = tb;
-
-    Node* bp1 = tb;
-
-    auto a = make_unique<string>("hello");
-
-    s = "3*3*10";
-
-    trunk = BuildTree(s);
-
-    //auto d1 = EvalTree(new TNode<double>(1.5));
-
-    auto d2 = EvalTree(trunk.get());
-
-    s = "5+13";
-
-    trunk = BuildTree(s);
-
-    auto d3 = EvalTree(trunk.get());
-
-
-    return 1;
 }

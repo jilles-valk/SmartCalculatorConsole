@@ -3,6 +3,7 @@
 #include <regex>
 #include <map>
 #include <sstream>
+#include <cmath>
 
 using namespace std;
 
@@ -71,11 +72,18 @@ string ParseInput(string const & input)
 	for (int i = 1; i < input.size(); i++) 
 	{
 		// turn -x into + -x so that the order of adding and subtracting does not matter
-		if (input[i] == '-' && input[i - 1] != '*' && input[i - 1] != '/' && input[i - 1] != '+')
+		if (input[i] == '-')
 		{
-			ss << '+';
+			if (i + 1 < input.size() && input[i + 1] == '-')
+			{
+				ss << '+';
+				i += 2;
+			}
+			else if (mapOper.find(input[i - 1]) == end(mapOper))
+			{
+				ss << '+';
+			}
 		}
-		//multiple -
 		ss << input[i];
 	}
 
@@ -187,6 +195,8 @@ double EvalTree(Node* const &node)
 	{
 		switch (op->GetValue())
 		{
+		case Oper::Power:
+			return pow(EvalTree(node->leftChild), EvalTree(node->rightChild));
 		case Oper::Times:
 			return EvalTree(node->leftChild) * EvalTree(node->rightChild);
 		case Oper::DevidedBy :
