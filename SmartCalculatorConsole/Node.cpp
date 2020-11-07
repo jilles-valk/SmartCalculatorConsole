@@ -21,7 +21,7 @@ struct LMR
 };
 
 //copy constructor
-Node::Node(Node& const source)
+Node::Node(Node & const source)
 {
 	if (source.leftChild != nullptr && source.rightChild != nullptr)
 	{
@@ -33,7 +33,7 @@ Node::Node(Node& const source)
 	}
 }
 
-Node& Node::operator=(Node& const node)
+Node & Node::operator=(Node & const node)
 {
 	if (node.leftChild != nullptr)
 	{
@@ -56,13 +56,13 @@ Node& Node::operator=(Node& const node)
 	return *this;
 }
 
-void swap(Node& b1, Node& b2)
+void swap(Node & b1, Node & b2)
 {
 	swap(b1.leftChild, b2.leftChild);
 	swap(b1.rightChild, b2.rightChild);
 };
 
-string ParseInput(string& const input)
+string ParseInput(string const & input)
 {
 	stringstream ss;
 
@@ -87,27 +87,26 @@ string ParseInput(string& const input)
 	);*/
 }
 
-string::iterator FindOperator(string::iterator& left, string::iterator& right)
+string::iterator FindOperator(string::iterator const & left, string::iterator right)
 {
 	string::iterator opPos;
-	auto tempRight = right;;
 
 	string::iterator parenthesesPos = find(left, right, '(');
 	if (parenthesesPos < right)
 	{
-		tempRight = parenthesesPos;
+		right = parenthesesPos;
 	}
 
-	opPos = find(left, tempRight, '+');
-	if (opPos == tempRight)
-		opPos = find(left, tempRight, '*');
-	if (opPos == tempRight)
-		opPos = find(left, tempRight, '/');
+	opPos = find(left, right, '+');
+	if (opPos == right)
+		opPos = find(left, right, '*');
+	if (opPos == right)
+		opPos = find(left, right, '/');
 
 	return opPos;
 }
 
-LMR FindLMR(string::iterator& left, string::iterator& right)
+LMR FindLMR(string::iterator left, string::iterator right)
 {
 	bool hasOuterParentheses = true;
 	string::iterator opPos;
@@ -152,7 +151,7 @@ LMR FindLMR(string::iterator& left, string::iterator& right)
 	return  LMR(left, opPos, right);
 }
 
-Node* BuildTreeRecursive(LMR lmr)
+Node* BuildTreeRecursive(LMR const & lmr)
 {
 	if (lmr.middle == lmr.right)
 	{
@@ -171,16 +170,16 @@ Node* BuildTreeRecursive(LMR lmr)
 	}
 }
 
-Node* BuildTree(string& input)
+unique_ptr<Node> BuildTree(string const & input)
 {
 	auto parsedInput = ParseInput(input);
 	auto beginInput = begin(parsedInput);
 	auto endInput = end(parsedInput);
 
-	return BuildTreeRecursive(FindLMR(beginInput, endInput));
+	return unique_ptr<Node>(BuildTreeRecursive(FindLMR(beginInput, endInput)));
 }
 
-double EvalTree(Node* const node)
+double EvalTree(Node* const &node)
 {
 	auto op = dynamic_cast<TNode<Oper>*>(node);
 

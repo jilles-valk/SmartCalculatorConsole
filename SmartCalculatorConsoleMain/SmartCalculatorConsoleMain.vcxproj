@@ -21,13 +21,13 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{996e34a5-e91a-4385-91be-34c1110225fa}</ProjectGuid>
-    <RootNamespace>SmartCalculatorConsole</RootNamespace>
+    <ProjectGuid>{5aa0b1aa-4ae1-46d5-9405-d0a962c1b0e8}</ProjectGuid>
+    <RootNamespace>SmartCalculatorConsoleMain</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -139,10 +139,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Node.cpp" />
+    <ProjectReference Include="..\SmartCalculatorConsole\SmartCalculatorConsole.vcxproj">
+      <Project>{996e34a5-e91a-4385-91be-34c1110225fa}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Node.h" />
+    <ClCompile Include="..\SmartCalculatorConsole\SmartCalculatorConsole.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

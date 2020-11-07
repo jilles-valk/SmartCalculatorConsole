@@ -1,6 +1,3 @@
-// SmartCalculatorConsole.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
 #include <string>
 #include <chrono>
@@ -9,7 +6,7 @@
 using namespace std;
 
 template<typename F, typename... Args>
-double TimeFunction(int numRuns, F func, Args&&... args)
+double TimeFunction(int numRuns, F& const func, Args&&... args)
 {
     auto start = chrono::high_resolution_clock::now();
 
@@ -39,7 +36,7 @@ int main()
 
         auto tree = BuildTree(input);
 
-        auto res = EvalTree(tree);
+        auto res = EvalTree(tree.get());
 
         cout << input << " = " << res << endl;
     }
@@ -50,7 +47,7 @@ int main()
     auto dur = TimeFunction(1000, BuildTree, s);
 
     auto trunk = BuildTree(s);
-    auto dur2 = TimeFunction(1000, EvalTree, trunk);
+    auto dur2 = TimeFunction(1000, EvalTree, trunk.get());
 
     auto start = chrono::high_resolution_clock::now();
     int i = 0;
@@ -64,7 +61,7 @@ int main()
     auto duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count();
     cout << "Find executed in " << duration << " microseconds" << endl;
 
-    auto d4 = EvalTree(trunk);
+    auto d4 = EvalTree(trunk.get());
 
 
     Node* bp = new Node();
@@ -90,16 +87,16 @@ int main()
 
     trunk = BuildTree(s);
 
-    auto d1 = EvalTree(new TNode<double>(1.5));
+    //auto d1 = EvalTree(new TNode<double>(1.5));
 
-    auto d2 = EvalTree(trunk);
+    auto d2 = EvalTree(trunk.get());
 
     s = "5+13";
 
     trunk = BuildTree(s);
 
-    auto d3 = EvalTree(trunk);
+    auto d3 = EvalTree(trunk.get());
 
 
-
+    return 1;
 }

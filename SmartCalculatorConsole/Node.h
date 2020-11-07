@@ -21,7 +21,7 @@ public:
 	Node(Node&& source) : leftChild{ source.leftChild }, rightChild{ source.rightChild } {source.leftChild = nullptr; source.rightChild = nullptr; }
 	Node& operator=(Node& const node);
 	friend void swap(Node& b1, Node& b2);
-	~Node() { delete leftChild; delete rightChild; cout << "Deleting node" << endl; };
+	~Node() { delete leftChild; delete rightChild; /*cout << "Deleting node" << endl;*/ };
 
 	virtual void dummy() {}
 };
@@ -40,5 +40,5 @@ public:
 };
 
 
-Node* BuildTree(string& input);
-double EvalTree(Node* const node);
+unique_ptr<Node> BuildTree(string const & input);
+double EvalTree(Node* const & node);
