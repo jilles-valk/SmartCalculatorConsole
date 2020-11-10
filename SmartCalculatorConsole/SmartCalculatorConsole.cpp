@@ -1,9 +1,12 @@
 #include <iostream>
 #include <string>
 #include <chrono>
+#include <sstream>
 #include "Node.h"
 
 using namespace std;
+
+static string const operators = "*/+";
 
 template<typename F, typename... Args>
 double TimeFunction(int numRuns, F& const func, Args&&... args)
@@ -21,6 +24,34 @@ double TimeFunction(int numRuns, F& const func, Args&&... args)
     cout << "Function executed " << numRuns << " times in " << duration << " microseconds" << endl;
     
     return duration;
+}
+
+string ParseInput1(string const& input)
+{
+	stringstream ss;
+
+	ss << input[0];
+
+	for (int i = 1; i < input.size(); i++)
+	{
+		// turn -x into + -x so that the order of adding and subtracting does not matter
+		if (input[i] == '-')
+		{
+			if (i + 1 < input.size() && input[i + 1] == '-')
+			{
+				ss << '+';
+				i += 2;
+			}
+			else if (find(begin(operators), end(operators), input[i - 1]) == end(operators))
+			{
+				ss << '+';
+			}
+		}
+		ss << input[i];
+	}
+
+
+	return ss.str();
 }
 
 int main()
@@ -44,6 +75,8 @@ int main()
     string s = "(5*(35-(3*874)+99*89))/(5+700-3*9)";
 
     auto dur = TimeFunction(1000, BuildTree, s);
+
+    auto dur1 = TimeFunction(1000, ParseInput1, s);
 
     auto trunk = BuildTree(s);
     auto dur2 = TimeFunction(1000, EvalTree, trunk.get());

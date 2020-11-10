@@ -6,7 +6,7 @@
 
 using namespace std;
 
-enum class Oper {None, Times, DevidedBy, Power, Plus, Minus};
+enum class Oper {None, Times, DevidedBy, Power, Plus, Minus, Sin, Cos, Tan};
 
 class Node
 {
