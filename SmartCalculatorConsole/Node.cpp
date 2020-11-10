@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+
 #include "Node.h"
 #include <vector>
 #include <regex>
@@ -19,6 +21,7 @@ struct OpIt
 	string::const_iterator begOp;
 	string::const_iterator endOp;
 
+	OpIt() {};
 	OpIt(string::const_iterator begOp, string::const_iterator endOp) : begOp{ begOp }, endOp{ endOp } {};
 };
 
@@ -28,6 +31,7 @@ struct LMR
 	OpIt middle;
 	string::const_iterator right;
 
+	LMR() {};
 	LMR(string::const_iterator left, string::const_iterator begOp, string::const_iterator endOp, string::const_iterator right) : left{ left }, middle{begOp, endOp }, right{ right } {};
 	LMR(string::const_iterator left, OpIt middle, string::const_iterator right) : left{ left }, middle{ middle }, right{ right } {};
 };
@@ -139,36 +143,72 @@ OpIt FindOperator(string::const_iterator left, string::const_iterator right)
 {
 	// check if number first?
 
-	sregex_token_iterator opPos;
+	right = find(left, right, '(');
 
-	string::const_iterator parenthesesPos = find(left, right, '(');
-	if (parenthesesPos < right)
+	auto opPos = right;
+
+	auto opOrderP = begin(opOrder);
+
+	// binary operators
+	do
 	{
-		right = parenthesesPos;
+		opPos = find(left, right, *opOrderP);
+		opOrderP++;
+	} while (opPos == right && opOrderP != end(opOrder));
+
+	if (opPos != right)
+	{
+		return OpIt(opPos, opPos + 1);
 	}
 
-	auto operatorReIt = sregex_token_iterator(left, right, operatorRe, 0);
-	auto regexItEnd = sregex_token_iterator();
-
-	if (operatorReIt != regexItEnd)
+	auto unaryOPP = begin(unaryOps);
+	auto s = string(left, right);
+	size_t pos;
+	// unary operators
+	do
 	{
-		auto opOrderP = begin(opOrder);
+		pos = s.find(*unaryOPP);
+		unaryOPP++;
+	} while (pos == string::npos && unaryOPP != end(unaryOps));
 
-		do
-		{
-			opPos = find(operatorReIt, sregex_token_iterator(), *opOrderP);
-			opOrderP++;
-		} while (opPos == regexItEnd && opOrderP != end(opOrder));
-
-		if (opPos != regexItEnd)
-		{
-			return OpIt(opPos->first, opPos->second);
-		}
-	}
-	else
+	if (pos != string::npos)
 	{
-		return OpIt(right, right);
+		return OpIt(left + pos, left + pos + size(*unaryOPP));
 	}
+
+	//return OpIt(right, right);
+
+	/*smatch operMatch;
+
+	if (regex_search(left, right, operMatch, operatorRe))
+	{
+		return OpIt(operMatch[0].first, operMatch[0].second);
+	}*/
+
+	return OpIt(right, right);
+
+	//auto operatorReIt = sregex_token_iterator(left, right, operatorRe, 0);
+	//auto regexItEnd = sregex_token_iterator();
+
+	//if (operatorReIt != regexItEnd)
+	//{
+	//	auto opOrderP = begin(opOrder);
+
+	//	do
+	//	{
+	//		opPos = find(operatorReIt, sregex_token_iterator(), *opOrderP);
+	//		opOrderP++;
+	//	} while (opPos == regexItEnd && opOrderP != end(opOrder));
+
+	//	if (opPos != regexItEnd)
+	//	{
+	//		return OpIt(opPos->first, opPos->second);
+	//	}
+	//}
+	//else
+	//{
+	//	return OpIt(right, right);
+	//}
 }
 
 LMR FindLMR(string::const_iterator left, string::const_iterator right)
@@ -220,12 +260,27 @@ Node* BuildTreeRecursive(LMR const & lmr)
 {
 	if (lmr.middle.begOp == lmr.right)
 	{
-		return new TNode<double>(stof(string(lmr.left, lmr.right)), nullptr, nullptr);
+		return new TNode<double>(stod(string(lmr.left, lmr.right)), nullptr, nullptr);
 	}
 
-	LMR leftLMR = FindLMR(lmr.left, lmr.middle.begOp);
+	LMR leftLMR;
+	LMR rightLMR;
 
-	LMR rightLMR = FindLMR(lmr.middle.endOp, lmr.right);
+	if (lmr.left == lmr.middle.begOp)
+	{
+		leftLMR = FindLMR(lmr.middle.endOp, lmr.right);
+
+		if (regex_match(lmr.middle.begOp, lmr.middle.endOp, operatorRe))
+		{
+			return new TNode<Oper>(mapOper.at(string(lmr.middle.begOp, lmr.middle.endOp)), BuildTreeRecursive(leftLMR));
+		}
+	}
+	else
+	{
+		leftLMR = FindLMR(lmr.left, lmr.middle.begOp);
+
+		rightLMR = FindLMR(lmr.middle.endOp, lmr.right);
+	}
 
 	if (regex_match(lmr.middle.begOp, lmr.middle.endOp, operatorRe))
 	{
@@ -258,6 +313,12 @@ double EvalTree(Node* const &node)
 			return EvalTree(node->leftChild) / EvalTree(node->rightChild);
 		case Oper::Plus:
 			return EvalTree(node->leftChild) + EvalTree(node->rightChild);
+		case Oper::Sin:
+			return sin(EvalTree(node->leftChild));
+		case Oper::Cos:
+			return cos(EvalTree(node->leftChild));
+		case Oper::Tan:
+			return tan(EvalTree(node->leftChild));
 		default:
 			break;
 		}

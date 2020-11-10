@@ -1,7 +1,4 @@
-//
-// pch.h
-// Header for standard system include files.
-//
+#define _USE_MATH_DEFINES
 
 #pragma once
 
