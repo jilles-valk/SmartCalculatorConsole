@@ -9,12 +9,12 @@
 
 using namespace std;
 
-regex const generalRe("\\*|\\/|\\+|\\d+|\\-\\d+");
-regex const operatorRe("[\\+\\*\\/\\^]|sin|cos|tan|log");
-string const operators = "*/+";
-vector<char> const opOrder{ '+', '*', '/', '^' };
-vector<string> const unaryOps{ "sin", "cos", "tan" };
-map<string, Oper> const mapOper = { {"*", Oper::Times}, { "/", Oper::DevidedBy }, {"^", Oper::Power } , {"+", Oper::Plus }, {"sin", Oper::Sin }, {"cos", Oper::Cos },{"tan", Oper::Tan } };
+static regex const binaryOperatorRe("[\\+\\*\\/\\^]");
+static regex const unaryOperatorRe("-|sin|cos|tan|log");
+static string const operators = "*/+";
+static vector<char> const opOrder{ '+', '*', '/', '^' };
+static vector<string> const unaryOps{ "-", "sin", "cos", "tan" };
+static map<string, Oper> const mapOper = { {"*", Oper::Times}, { "/", Oper::DevidedBy }, {"^", Oper::Power } , {"+", Oper::Plus }, {"-", Oper::Negative }, {"sin", Oper::Sin }, {"cos", Oper::Cos },{"tan", Oper::Tan } };
 
 struct OpIt
 {
@@ -103,112 +103,109 @@ string ParseInput(string const & input)
 		ss << input[i];
 	}
 
-	/*regex const operMinusRegex("\\w\\-");
-	regex const doubleMinusRe("--");
-	regex const toBeTransformed("sin|cos|tan|sina|cosa|tana\log|sqrt");
-
-	vector<int> insertPlusPos;
-
-	auto tempInput =  regex_replace(input, doubleMinusRe, "+");
-
-	auto operMinusIt = sregex_token_iterator(begin(tempInput), end(tempInput), operMinusRegex, 0);
-	auto regexItEnd = sregex_token_iterator();
-	auto a = end(input) - begin(input);
-
-	for_each(operMinusIt, regexItEnd, [&tempInput](auto begEnd) {
-		insertPlusPos.push_back(begEnd.first + 1 - begin(tempInput));
-		});*/
-
-	//auto toTransformIt = sregex_token_iterator(begin(input), end(input), toBeTransformed, 0);
-
-	//for_each(toTransformIt, regexItEnd, [&input](auto begEnd) {
-	//	input.insert(begEnd.first + 1, '+');
-	//	});
-
-	//map<string, string> ma = { {"q", "a"} };
-
-	//regex_replace("rewqrw", toBeTransformed, ma["$&"]);
-
-
-
 	return ss.str();
-
-	/*return vector<string>(
-		sregex_token_iterator(plusInput.begin(), plusInput.end(), generalRe, 0),
-		sregex_token_iterator()
-	);*/
 }
 
-OpIt FindOperator(string::const_iterator left, string::const_iterator right)
+string::const_iterator FindMatchingClosingParentheses(string::const_iterator left, string::const_iterator& right)
+{
+	int parenthesisLevel = 0;
+
+	while (left < right)
+	{
+		if (*left == '(')
+		{
+			parenthesisLevel++;
+		}
+		else if (*left == ')' && --parenthesisLevel == 0)
+		{
+
+			return left;
+		}
+		left++;
+	}
+	return right;
+}
+
+OpIt FindOperator(string::const_iterator & left, string::const_iterator & right)
 {
 	// check if number first?
 
-	right = find(left, right, '(');
+	if (*left == '(')
+	{
+		left = FindMatchingClosingParentheses(left, right) + 1;
+		
+		return FindOperator(left, right);
+	}
+	
+	auto tempLeft = left;
+	auto firstParentheses = right;
+	OpIt opBeforeParentheses(right, right);
+	OpIt opAfterParentheses(right, right);
 
-	auto opPos = right;
+
+	firstParentheses = find(left, right, '(');
+
+	auto opPos = firstParentheses;
 
 	auto opOrderP = begin(opOrder);
 
-	// binary operators
+	// binary operators left
 	do
 	{
-		opPos = find(left, right, *opOrderP);
+		opPos = find(left, firstParentheses, *opOrderP);
 		opOrderP++;
-	} while (opPos == right && opOrderP != end(opOrder));
+	} while (opPos == firstParentheses && opOrderP != end(opOrder));
 
-	if (opPos != right)
+	if (opPos != firstParentheses)
 	{
-		return OpIt(opPos, opPos + 1);
+		opBeforeParentheses = OpIt(opPos, opPos + 1);
+		// + is first, so no need to look for other operators
+		if (*opBeforeParentheses.begOp == '+') return opBeforeParentheses;
 	}
 
+	//operators right
+	if (firstParentheses != right)
+	{
+		tempLeft = FindMatchingClosingParentheses(firstParentheses, right) + 1;
+
+		if (tempLeft != right)
+		{
+			opAfterParentheses = FindOperator(tempLeft, right);
+
+			// + is first, so no need to look for other operators
+			if (*opAfterParentheses.begOp == '+') return opAfterParentheses;
+		}
+	}
+
+	if (opBeforeParentheses.begOp != right && opAfterParentheses.begOp != right)
+	{
+		if (find(begin(opOrder), end(opOrder), *opBeforeParentheses.begOp) >= find(begin(opOrder), end(opOrder), *opAfterParentheses.begOp))
+		{
+			return opAfterParentheses;
+		}
+		else
+		{
+			return opBeforeParentheses;
+		}
+	}
+
+	if (opAfterParentheses.begOp != right) return opAfterParentheses;
+
+	if (opBeforeParentheses.begOp != right) return opBeforeParentheses;
+
 	auto unaryOPP = begin(unaryOps);
-	auto s = string(left, right);
+	auto s = string(left, firstParentheses);
 	size_t pos;
+
 	// unary operators
 	do
 	{
 		pos = s.find(*unaryOPP);
-		unaryOPP++;
-	} while (pos == string::npos && unaryOPP != end(unaryOps));
+	} while (pos == string::npos && ++unaryOPP != end(unaryOps));
 
-	if (pos != string::npos)
-	{
-		return OpIt(left + pos, left + pos + size(*unaryOPP));
-	}
-
-	//return OpIt(right, right);
-
-	/*smatch operMatch;
-
-	if (regex_search(left, right, operMatch, operatorRe))
-	{
-		return OpIt(operMatch[0].first, operMatch[0].second);
-	}*/
+	if (pos != string::npos) return OpIt(left + pos, left + pos + size(*unaryOPP));
 
 	return OpIt(right, right);
-
-	//auto operatorReIt = sregex_token_iterator(left, right, operatorRe, 0);
-	//auto regexItEnd = sregex_token_iterator();
-
-	//if (operatorReIt != regexItEnd)
-	//{
-	//	auto opOrderP = begin(opOrder);
-
-	//	do
-	//	{
-	//		opPos = find(operatorReIt, sregex_token_iterator(), *opOrderP);
-	//		opOrderP++;
-	//	} while (opPos == regexItEnd && opOrderP != end(opOrder));
-
-	//	if (opPos != regexItEnd)
-	//	{
-	//		return OpIt(opPos->first, opPos->second);
-	//	}
-	//}
-	//else
-	//{
-	//	return OpIt(right, right);
-	//}
 }
 
 LMR FindLMR(string::const_iterator left, string::const_iterator right)
@@ -217,7 +214,7 @@ LMR FindLMR(string::const_iterator left, string::const_iterator right)
 	string::iterator opPos;
 	auto tempLeft = left;
 
-	while (hasOuterParentheses && *left == '(')
+	while (hasOuterParentheses && *left == '(' && *(right - 1) == ')')
 	{
 		tempLeft = left;
 		int parenthesesDepth = 0;
@@ -270,7 +267,7 @@ Node* BuildTreeRecursive(LMR const & lmr)
 	{
 		leftLMR = FindLMR(lmr.middle.endOp, lmr.right);
 
-		if (regex_match(lmr.middle.begOp, lmr.middle.endOp, operatorRe))
+		if (regex_match(lmr.middle.begOp, lmr.middle.endOp, unaryOperatorRe))
 		{
 			return new TNode<Oper>(mapOper.at(string(lmr.middle.begOp, lmr.middle.endOp)), BuildTreeRecursive(leftLMR));
 		}
@@ -282,7 +279,7 @@ Node* BuildTreeRecursive(LMR const & lmr)
 		rightLMR = FindLMR(lmr.middle.endOp, lmr.right);
 	}
 
-	if (regex_match(lmr.middle.begOp, lmr.middle.endOp, operatorRe))
+	if (regex_match(lmr.middle.begOp, lmr.middle.endOp, binaryOperatorRe))
 	{
 		return new TNode<Oper>(mapOper.at(string(lmr.middle.begOp, lmr.middle.endOp)), BuildTreeRecursive(leftLMR), BuildTreeRecursive(rightLMR));
 	}
@@ -313,6 +310,8 @@ double EvalTree(Node* const &node)
 			return EvalTree(node->leftChild) / EvalTree(node->rightChild);
 		case Oper::Plus:
 			return EvalTree(node->leftChild) + EvalTree(node->rightChild);
+		case Oper::Negative:
+			return -EvalTree(node->leftChild);
 		case Oper::Sin:
 			return sin(EvalTree(node->leftChild));
 		case Oper::Cos:

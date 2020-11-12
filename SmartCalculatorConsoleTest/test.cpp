@@ -27,10 +27,13 @@ TEST(BuildTreeTest, HandlesBuildingAdditionTree) {
 	auto result = BuildTree("1+2");
 
 	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Plus);
 	auto lc = dynamic_cast<TNode<double>*>(op->leftChild);
+	ASSERT_TRUE(lc != NULL);
 	EXPECT_DOUBLE_EQ(lc->value, 1);
 	auto rc = dynamic_cast<TNode<double>*>(op->rightChild);
+	ASSERT_TRUE(rc != NULL);
 	EXPECT_DOUBLE_EQ(rc->value, 2);
 }
 
@@ -38,10 +41,13 @@ TEST(BuildTreeTest, HandlesBuildingDoubleMinusTree) {
 	auto result = BuildTree("1--2");
 
 	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Plus);
 	auto lc = dynamic_cast<TNode<double>*>(op->leftChild);
+	ASSERT_TRUE(lc != NULL);
 	EXPECT_DOUBLE_EQ(lc->value, 1);
 	auto rc = dynamic_cast<TNode<double>*>(op->rightChild);
+	ASSERT_TRUE(rc != NULL);
 	EXPECT_DOUBLE_EQ(rc->value, 2);
 }
 
@@ -49,19 +55,28 @@ TEST(BuildTreeTest, HandlesBuildingSubtractionTree) {
 	auto result = BuildTree("1-2");
 
 	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Plus);
 	auto lc = dynamic_cast<TNode<double>*>(op->leftChild);
+	ASSERT_TRUE(lc != NULL);
 	EXPECT_DOUBLE_EQ(lc->value, 1);
-	auto rc = dynamic_cast<TNode<double>*>(op->rightChild);
-	EXPECT_DOUBLE_EQ(rc->value, -2);
+	auto rc = dynamic_cast<TNode<Oper>*>(op->rightChild);
+	ASSERT_TRUE(rc != NULL);
+	ASSERT_TRUE(rc != NULL);
+	EXPECT_EQ(rc->value, Oper::Negative);
+	auto rclc = dynamic_cast<TNode<double>*>(rc->leftChild);
+	ASSERT_TRUE(rc != NULL);
+	EXPECT_DOUBLE_EQ(rclc->value, 2);
 }
 
 TEST(BuildTreeTest, HandlesBuildingCosTree) {
 	auto result = BuildTree("cos(1.57)");
 
 	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Cos);
 	auto lc = dynamic_cast<TNode<double>*>(op->leftChild);
+	ASSERT_TRUE(lc != NULL);
 	EXPECT_DOUBLE_EQ(lc->value, 1.57);
 }
 
@@ -69,8 +84,10 @@ TEST(BuildTreeTest, HandlesBuildingCosTreeBinaryBehind) {
 	auto result = BuildTree("cos(1.57)+3");
 
 	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Plus);
 	auto lc = dynamic_cast<TNode<Oper>*>(op->leftChild);
+	ASSERT_TRUE(lc != NULL);
 	EXPECT_EQ(lc->value, Oper::Cos);
 }
 
@@ -110,76 +127,135 @@ TEST_F(BasicOperatorEvalTest, HandlesSin)
 	EXPECT_DOUBLE_EQ(result, 1);
 }
 
-TEST(BracketTreeBuildingTest, HandlesSinglePointlessBrackets)
+TEST(ParenthesesTreeBuildingTest, HandlesSinglePointlessParentheses)
 {
 	auto result = BuildTree("(1-2)");
 
 	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Plus);
 	auto lc = dynamic_cast<TNode<double>*>(op->leftChild);
+	ASSERT_TRUE(lc != NULL);
 	EXPECT_EQ(lc->value, 1);
-	auto rc = dynamic_cast<TNode<double>*>(op->rightChild);
-	EXPECT_EQ(rc->value, -2);
+	auto rc = dynamic_cast<TNode<Oper>*>(op->rightChild);
+	ASSERT_TRUE(rc != NULL);
+	EXPECT_EQ(rc->value, Oper::Negative);
+	auto rclc = dynamic_cast<TNode<double>*>(rc->leftChild);
+	ASSERT_TRUE(rclc != NULL);
+	EXPECT_EQ(rclc->value, 2);
 }
 
-TEST(BracketTreeBuildingTest, HandlesMultipleNestedPointlessBrackets)
+TEST(ParenthesesTreeBuildingTest, HandlesMultipleNestedPointlessParentheses)
 {
 	auto result = BuildTree("(((((1-2)))))");
 
 	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Plus);
 	auto lc = dynamic_cast<TNode<double>*>(op->leftChild);
+	ASSERT_TRUE(lc != NULL);
 	EXPECT_EQ(lc->value, 1);
-	auto rc = dynamic_cast<TNode<double>*>(op->rightChild);
-	EXPECT_EQ(rc->value, -2);
+	auto rc = dynamic_cast<TNode<Oper>*>(op->rightChild);
+	ASSERT_TRUE(rc != NULL);
+	EXPECT_EQ(rc->value, Oper::Negative);
+	auto rclc = dynamic_cast<TNode<double>*>(rc->leftChild);
+	ASSERT_TRUE(rclc != NULL);
+	EXPECT_EQ(rclc->value, 2);
 }
 
-TEST(BracketTreeBuildingTest, HandlesMultipleBrackets)
+TEST(ParenthesesTreeBuildingTest, HandlesMultipleParentheses)
 {
 	auto result = BuildTree("(1-2)*(5+5)");
 
 	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Times);
 	auto lc = dynamic_cast<TNode<Oper>*>(op->leftChild);
+	ASSERT_TRUE(lc != NULL);
 	EXPECT_EQ(lc->value, Oper::Plus);
-	auto lcrc = dynamic_cast<TNode<double>*>(lc->rightChild);
-	EXPECT_EQ(lcrc->value, -2);
+	auto lcrc = dynamic_cast<TNode<Oper>*>(lc->rightChild);
+	ASSERT_TRUE(lcrc != NULL);
+	EXPECT_EQ(lcrc->value, Oper::Negative);
 	auto rc = dynamic_cast<TNode<Oper>*>(op->rightChild);
+	ASSERT_TRUE(rc != NULL);
 	EXPECT_EQ(rc->value, Oper::Plus);
 }
 
-TEST(BracketTreeBuildingTest, HandlesMultipleNestedBrackets)
+TEST(ParenthesesTreeBuildingTest, HandlesNegativeParentheses)
+{
+	auto result = BuildTree("-(5+3)");
+
+	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	ASSERT_TRUE(op != NULL);
+	EXPECT_EQ(op->value, Oper::Negative);
+	auto lc = dynamic_cast<TNode<Oper>*>(op->leftChild);
+	ASSERT_TRUE(lc != NULL);
+	EXPECT_EQ(lc->value, Oper::Plus);
+	auto lclc = dynamic_cast<TNode<double>*>(lc->rightChild);
+	ASSERT_TRUE(lclc != NULL);
+	EXPECT_EQ(lclc->value, 3);
+}
+
+TEST(ParenthesesTreeBuildingTest, HandlesMultipleNestedParentheses)
 {
 	auto result = BuildTree("((1-2)*(5+5))/5");
 
 	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::DevidedBy);
 	auto lc = dynamic_cast<TNode<Oper>*>(op->leftChild);
+	ASSERT_TRUE(lc != NULL);
 	EXPECT_EQ(lc->value, Oper::Times);
 	auto lclc = dynamic_cast<TNode<Oper>*>(lc->leftChild);
+	ASSERT_TRUE(lclc != NULL);
 	EXPECT_EQ(lclc->value, Oper::Plus);
-	auto lclcrc = dynamic_cast<TNode<double>*>(lclc->rightChild);
-	EXPECT_EQ(lclcrc->value, -2);
+	auto lclcrc = dynamic_cast<TNode<Oper>*>(lclc->rightChild);
+	ASSERT_TRUE(lclcrc != NULL);
+	EXPECT_EQ(lclcrc->value, Oper::Negative);
 	auto lcrc = dynamic_cast<TNode<Oper>*>(lc->rightChild);
+	ASSERT_TRUE(lcrc != NULL);
 	EXPECT_EQ(lcrc->value, Oper::Plus);
 	auto rc = dynamic_cast<TNode<double>*>(op->rightChild);
+	ASSERT_TRUE(rc != NULL);
 	EXPECT_EQ(rc->value, 5);
 }
 
-TEST(BracketTreeBuildingTest, HandlesMultipleBracketsWithUnary)
+TEST(ParenthesesTreeBuildingTest, HandlesMultipleParenthesesWithUnary)
 {
 	auto result = BuildTree("(1-2)*cos(2*3.14)");
 
 	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Times);
 	auto lc = dynamic_cast<TNode<Oper>*>(op->leftChild);
+	ASSERT_TRUE(lc != NULL);
 	EXPECT_EQ(lc->value, Oper::Plus);
-	auto lcrc = dynamic_cast<TNode<double>*>(lc->rightChild);
-	EXPECT_EQ(lcrc->value, -2);
+	auto lcrc = dynamic_cast<TNode<Oper>*>(lc->rightChild);
+	ASSERT_TRUE(lcrc != NULL);
+	EXPECT_EQ(lcrc->value, Oper::Negative);
 	auto rc = dynamic_cast<TNode<Oper>*>(op->rightChild);
+	ASSERT_TRUE(rc != NULL);
 	EXPECT_EQ(rc->value, Oper::Cos);
 	auto rcrc = dynamic_cast<TNode<Oper>*>(rc->leftChild);
+	ASSERT_TRUE(rcrc != NULL);
 	EXPECT_EQ(rcrc->value, Oper::Times);
 	auto rcrcrc = dynamic_cast<TNode<double>*>(rcrc->rightChild);
+	ASSERT_TRUE(rcrcrc != NULL);
 	EXPECT_EQ(rcrcrc->value, 3.14);
+}
+
+TEST(NondebugableComplexMathBuildEvalTest, HandlesManyPlusMinus)
+{
+	auto tree = BuildTree("5+3-5-5+9+9-4-2-5+8+2354-54+8+2+54-5--54");
+	auto result = EvalTree(tree.get());
+
+	EXPECT_DOUBLE_EQ(result, 2426);
+}
+
+TEST(NondebugableComplexMathBuildEvalTest, HandlesManyBinaryOperators)
+{
+	auto tree = BuildTree("(5*(35-(3*874)+99*89))/(5+700-3*9)");
+	auto result = EvalTree(tree.get());
+
+	EXPECT_DOUBLE_EQ(result, 45.89970501474926);
 }
