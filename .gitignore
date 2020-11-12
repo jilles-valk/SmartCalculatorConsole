@@ -10,6 +10,8 @@
 *.userosscache
 *.sln.docstates
 
+.diagsession
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -338,3 +340,4 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/Report20201112-2106.diagsession
