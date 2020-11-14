@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "../SmartCalculatorConsole/Node.h"
+#include "../SmartCalculatorLib/Node.h"
 
 class BasicOperatorEvalTest : public :: testing::Test
 {
