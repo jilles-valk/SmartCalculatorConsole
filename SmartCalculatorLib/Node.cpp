@@ -1,20 +1,23 @@
 #define _USE_MATH_DEFINES
 
 #include "Node.h"
+#include "Exceptions.h"
 #include <vector>
 #include <regex>
 #include <map>
-#include <sstream>
 #include <cmath>
+#include <exception>
 
 using namespace std;
 
 static regex const binaryOperatorRe("[\\+\\*\\/\\^]");
 static regex const unaryOperatorRe("-|sin|cos|tan|log");
-static string const operators = "*/+";
+
 static vector<char> const opOrder{ '+', '*', '/', '^' };
 static vector<string> const unaryOps{ "-", "sin", "cos", "tan" };
 static map<string, Oper> const mapOper = { {"*", Oper::Times}, { "/", Oper::DevidedBy }, {"^", Oper::Power } , {"+", Oper::Plus }, {"-", Oper::Negative }, {"sin", Oper::Sin }, {"cos", Oper::Cos },{"tan", Oper::Tan } };
+
+
 
 struct OpIt
 {
@@ -78,33 +81,6 @@ void swap(Node & b1, Node & b2)
 	swap(b1.leftChild, b2.leftChild);
 	swap(b1.rightChild, b2.rightChild);
 };
-
-string ParseInput(string const & input)
-{
-	stringstream ss;
-
-	ss << input[0];
-
-	for (int i = 1; i < input.size(); i++) 
-	{
-		// turn -x into + -x so that the order of adding and subtracting does not matter
-		if (input[i] == '-')
-		{
-			if (i + 1 < input.size() && input[i + 1] == '-')
-			{
-				ss << '+';
-				i += 2;
-			}
-			else if (find(begin(operators), end(operators), input[i - 1]) == end(operators))
-			{
-				ss << '+';
-			}
-		}
-		ss << input[i];
-	}
-
-	return ss.str();
-}
 
 string::const_iterator FindMatchingClosingParentheses(string::const_iterator left, string::const_iterator& right)
 {
@@ -255,9 +231,17 @@ LMR FindLMR(string::const_iterator left, string::const_iterator right)
 
 Node* BuildTreeRecursive(LMR const & lmr)
 {
+
 	if (lmr.middle.begOp == lmr.right)
 	{
-		return new TNode<double>(stod(string(lmr.left, lmr.right)), nullptr, nullptr);
+		try
+		{
+			return new TNode<double>(stod(string(lmr.left, lmr.right)), nullptr, nullptr);
+		}
+		catch (invalid_argument const& ia)
+		{
+			throw ValueParseException(lmr.left, lmr.right);
+		}
 	}
 
 	LMR leftLMR;
@@ -276,7 +260,14 @@ Node* BuildTreeRecursive(LMR const & lmr)
 	{
 		leftLMR = FindLMR(lmr.left, lmr.middle.begOp);
 
-		rightLMR = FindLMR(lmr.middle.endOp, lmr.right);
+		if (lmr.middle.endOp != lmr.right)
+		{
+			rightLMR = FindLMR(lmr.middle.endOp, lmr.right);
+		}
+		else
+		{
+			throw NoRightValueForOperator(lmr.middle.begOp, lmr.middle.endOp);
+		}
 	}
 
 	if (regex_match(lmr.middle.begOp, lmr.middle.endOp, binaryOperatorRe))
@@ -287,11 +278,7 @@ Node* BuildTreeRecursive(LMR const & lmr)
 
 unique_ptr<Node> BuildTree(string const & input)
 {
-	auto parsedInput = ParseInput(input);
-	auto beginInput = begin(parsedInput);
-	auto endInput = end(parsedInput);
-
-	return unique_ptr<Node>(BuildTreeRecursive(FindLMR(beginInput, endInput)));
+	return unique_ptr<Node>(BuildTreeRecursive(FindLMR(cbegin(input), cend(input))));
 }
 
 double EvalTree(Node* const &node)
@@ -329,5 +316,7 @@ double EvalTree(Node* const &node)
 	{
 		return val->value;
 	}
+
+	return nan("");
 }
 

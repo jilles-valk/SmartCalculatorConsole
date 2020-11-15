@@ -4,8 +4,6 @@
 #include <utility>
 #include <iostream>
 
-using namespace std;
-
 enum class Oper {None, Times, DevidedBy, Power, Plus, Negative, Sin, Cos, Tan};
 
 class Node
@@ -40,5 +38,5 @@ public:
 };
 
 
-unique_ptr<Node> BuildTree(string const & input);
+std::unique_ptr<Node> BuildTree(std::string const & input);
 double EvalTree(Node* const & node);

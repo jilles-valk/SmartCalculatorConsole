@@ -45,7 +45,7 @@ int main()
         cout << input << " = " << std::setprecision(15) << res << endl;
     }
 
-    string s = "(5*(35-(3*874)+99*89))/(5+700-3*9)";
+    string s = "(5*(35-(3*874)+99*89))/(5+700-3*9)/sin(2)";
 
     auto dur = TimeFunction(1000, BuildTree, s);
 
