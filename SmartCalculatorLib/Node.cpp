@@ -4,7 +4,7 @@
 #include "Exceptions.h"
 #include <vector>
 #include <regex>
-#include <map>
+#include <unordered_map>
 #include <cmath>
 #include <exception>
 
@@ -15,7 +15,8 @@ static regex const unaryOperatorRe("-|sin|cos|tan|log");
 
 static vector<char> const opOrder{ '+', '*', '/', '^' };
 static vector<string> const unaryOps{ "-", "sin", "cos", "tan" };
-static map<string, Oper> const mapOper = { {"*", Oper::Times}, { "/", Oper::DevidedBy }, {"^", Oper::Power } , {"+", Oper::Plus }, {"-", Oper::Negative }, {"sin", Oper::Sin }, {"cos", Oper::Cos },{"tan", Oper::Tan } };
+static unordered_map<string, Oper> const mapUnaryOper = { {"-", Oper::Negative }, {"sin", Oper::Sin }, {"cos", Oper::Cos },{"tan", Oper::Tan } };
+static unordered_map<string, Oper> const mapBinaryOper = { {"*", Oper::Times}, { "/", Oper::DevidedBy }, {"^", Oper::Power } , {"+", Oper::Plus } };
 
 
 
@@ -99,25 +100,31 @@ string::const_iterator FindMatchingClosingParentheses(string::const_iterator lef
 		}
 		left++;
 	}
+
 	return right;
 }
 
 OpIt FindOperator(string::const_iterator & left, string::const_iterator & right)
 {
 	// check if number first?
+	auto tempLeft = left;
 
 	if (*left == '(')
 	{
-		left = FindMatchingClosingParentheses(left, right) + 1;
-		
-		return FindOperator(left, right);
+		tempLeft = FindMatchingClosingParentheses(left, right);
+
+		if (tempLeft != right)
+		{
+			left = tempLeft + 1;
+		}
+		else
+		{
+			throw ParenthesesException(left, left + 1);
+		}
 	}
 	
-	auto tempLeft = left;
 	auto firstParentheses = right;
 	OpIt opBeforeParentheses(right, right);
-	OpIt opAfterParentheses(right, right);
-
 
 	firstParentheses = find(left, right, '(');
 
@@ -139,15 +146,28 @@ OpIt FindOperator(string::const_iterator & left, string::const_iterator & right)
 		if (*opBeforeParentheses.begOp == '+') return opBeforeParentheses;
 	}
 
+	OpIt opAfterParentheses(right, right);
+
 	//operators right
 	if (firstParentheses != right)
 	{
-		tempLeft = FindMatchingClosingParentheses(firstParentheses, right) + 1;
+		tempLeft = FindMatchingClosingParentheses(firstParentheses, right);
+
+		if (tempLeft == right)
+		{
+			throw ParenthesesException(firstParentheses, firstParentheses + 1);
+		}
+
+		tempLeft++;
 
 		if (tempLeft != right)
 		{
 			opAfterParentheses = FindOperator(tempLeft, right);
 
+			if (opAfterParentheses.begOp == right)
+			{
+				throw ValueParseException(tempLeft, right);
+			}
 			// + is first, so no need to look for other operators
 			if (*opAfterParentheses.begOp == '+') return opAfterParentheses;
 		}
@@ -246,14 +266,28 @@ Node* BuildTreeRecursive(LMR const & lmr)
 
 	LMR leftLMR;
 	LMR rightLMR;
+	string oper;
 
 	if (lmr.left == lmr.middle.begOp)
 	{
-		leftLMR = FindLMR(lmr.middle.endOp, lmr.right);
-
-		if (regex_match(lmr.middle.begOp, lmr.middle.endOp, unaryOperatorRe))
+		if (lmr.middle.endOp != lmr.right)
 		{
-			return new TNode<Oper>(mapOper.at(string(lmr.middle.begOp, lmr.middle.endOp)), BuildTreeRecursive(leftLMR));
+			leftLMR = FindLMR(lmr.middle.endOp, lmr.right);
+		}
+		else
+		{
+			throw ValueParseException(lmr.middle.endOp, lmr.right);
+		}
+
+		oper = string(lmr.middle.begOp, lmr.middle.endOp);
+
+		if (mapUnaryOper.count(oper) > 0)
+		{
+			return new TNode<Oper>(mapUnaryOper.at(oper), BuildTreeRecursive(leftLMR));
+		}
+		else
+		{
+			throw NoValidOperatorException(lmr.middle.begOp, lmr.middle.endOp);
 		}
 	}
 	else
@@ -270,9 +304,15 @@ Node* BuildTreeRecursive(LMR const & lmr)
 		}
 	}
 
-	if (regex_match(lmr.middle.begOp, lmr.middle.endOp, binaryOperatorRe))
+	oper = string(lmr.middle.begOp, lmr.middle.endOp);
+
+	if (mapBinaryOper.count(oper) > 0)
 	{
-		return new TNode<Oper>(mapOper.at(string(lmr.middle.begOp, lmr.middle.endOp)), BuildTreeRecursive(leftLMR), BuildTreeRecursive(rightLMR));
+		return new TNode<Oper>(mapBinaryOper.at(oper), BuildTreeRecursive(leftLMR), BuildTreeRecursive(rightLMR));
+	}
+	else
+	{
+		throw NoValidOperatorException(lmr.middle.begOp, lmr.middle.endOp);
 	}
 }
 

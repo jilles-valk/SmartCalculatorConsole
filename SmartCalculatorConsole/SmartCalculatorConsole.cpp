@@ -3,7 +3,7 @@
 #include <chrono>
 #include <sstream>
 #include <iomanip>
-#include "Node.h"
+#include "Tree.h"
 
 using namespace std;
 
@@ -29,6 +29,8 @@ double TimeFunction(int numRuns, F& const func, Args&&... args)
 
 int main()
 {
+    Tree tree;
+
     while (true)
     {
         string input = "";
@@ -38,19 +40,23 @@ int main()
 
         if (input == "q") break;
 
-        auto tree = BuildTree(input);
+        tree = Tree(input);
+        tree.Build();
 
-        auto res = EvalTree(tree.get());
+        auto res = tree.Eval();
 
         cout << input << " = " << std::setprecision(15) << res << endl;
     }
 
     string s = "(5*(35-(3*874)+99*89))/(5+700-3*9)/sin(2)";
 
-    auto dur = TimeFunction(1000, BuildTree, s);
+    tree = Tree(s);
 
-    auto trunk = BuildTree(s);
-    auto dur2 = TimeFunction(1000, EvalTree, trunk.get());
+    tree.Build();
+    
+    auto dur = TimeFunction(1000, BuildTree, tree.parsedInput);
+
+    auto dur2 = TimeFunction(1000, EvalTree, tree.trunk.get());
 
     auto start = chrono::high_resolution_clock::now();
     int i = 0;

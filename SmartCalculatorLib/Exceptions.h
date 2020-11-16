@@ -25,7 +25,7 @@ struct ParenthesesException : public TreeBuildingException
 
 	virtual const char* what() const throw()
 	{
-		return "Exception with parentheses ";
+		return "Exception with parentheses.";
 	}
 };
 
@@ -35,7 +35,27 @@ struct ValueParseException : public TreeBuildingException
 
 	virtual const char* what() const throw()
 	{
-		return "Exception parsing value: ";
+		return "Exception parsing value.";
+	}
+};
+
+struct NoValidOperatorException : public TreeBuildingException
+{
+	NoValidOperatorException(std::string::const_iterator left, std::string::const_iterator right) : TreeBuildingException{ left, right } {};
+
+	virtual const char* what() const throw()
+	{
+		return "Exception parsing operator.";
+	}
+};
+
+struct DoubleOperatorException : public TreeBuildingException
+{
+	DoubleOperatorException(std::string::const_iterator left, std::string::const_iterator right) : TreeBuildingException{ left, right } {};
+
+	virtual const char* what() const throw()
+	{
+		return "Exception parsing operator.";
 	}
 };
 
@@ -45,6 +65,6 @@ struct NoRightValueForOperator : public TreeBuildingException
 
 	virtual const char* what() const throw()
 	{
-		return "Exception no value to the right of operator. ";
+		return "Exception no value to the right of operator.";
 	}
 };
