@@ -19,6 +19,7 @@ public:
 	double Eval();
 	int GetStartIndexException();
 	int GetEndIndexException();
+	double IsFunction();
 
 private:
 	void ParseInput(std::string const & input);

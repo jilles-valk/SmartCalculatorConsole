@@ -21,6 +21,7 @@ public:
 	friend void swap(Node& b1, Node& b2);
 	~Node() { delete leftChild; delete rightChild; /*cout << "Deleting node" << endl;*/ };
 
+	bool HasVariableNode();
 	virtual void dummy() {}
 };
 
@@ -34,6 +35,7 @@ public:
 	TNode(T value, Node* leftChild) : value{ value }, Node{ leftChild }{};
 	TNode(T value, Node* leftChild, Node* rightChild) : value{ value }, Node{ leftChild, rightChild }{};
 
+	bool HasVariableNode();
 	T GetValue() { return value; };
 };
 

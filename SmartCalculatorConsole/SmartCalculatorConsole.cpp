@@ -10,7 +10,7 @@ using namespace std;
 static string const operators = "*/+";
 
 template<typename F, typename... Args>
-double TimeFunction(int numRuns, F& const func, Args&&... args)
+double TimeFunction(int numRuns, string name, F& const func, Args&&... args)
 {
     auto start = chrono::high_resolution_clock::now();
 
@@ -22,7 +22,7 @@ double TimeFunction(int numRuns, F& const func, Args&&... args)
     }
 
     auto duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count();
-    cout << "Function executed " << numRuns << " times in " << duration << " microseconds" << endl;
+    cout << "Function " << name << " executed " << numRuns << " times in " << duration << " microseconds" << endl;
     
     return duration;
 }
@@ -46,6 +46,10 @@ int main()
         auto res = tree.Eval();
 
         cout << input << " = " << std::setprecision(15) << res << endl;
+
+        auto dur = TimeFunction(1000, "BuildTree", BuildTree, tree.parsedInput);
+
+        auto dur2 = TimeFunction(1000, "EvalTree", EvalTree, tree.trunk.get());
     }
 
     string s = "(5*(35-(3*874)+99*89))/(5+700-3*9)/sin(2)";
@@ -54,9 +58,9 @@ int main()
 
     tree.Build();
     
-    auto dur = TimeFunction(1000, BuildTree, tree.parsedInput);
+    auto dur = TimeFunction(1000, "BuildTree", BuildTree, tree.parsedInput);
 
-    auto dur2 = TimeFunction(1000, EvalTree, tree.trunk.get());
+    auto dur2 = TimeFunction(1000, "EvalTree", EvalTree, tree.trunk.get());
 
     auto start = chrono::high_resolution_clock::now();
     int i = 0;

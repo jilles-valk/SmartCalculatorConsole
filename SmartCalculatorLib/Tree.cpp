@@ -20,6 +20,7 @@ double Tree::Eval()
 	return EvalTree(trunk.get());
 }
 
+//compensate for difference parsedInput and originalInput
 int Tree::GetStartIndexException()
 {
 	return tbe.left - cbegin(parsedInput);
@@ -30,6 +31,10 @@ int Tree::GetEndIndexException()
 	return tbe.right - cbegin(parsedInput);
 }
 
+double Tree::IsFunction()
+{
+	return trunk.get()->HasVariableNode();
+}
 
 void Tree::ParseInput(std::string const& input)
 {

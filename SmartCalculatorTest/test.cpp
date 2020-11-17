@@ -1,32 +1,33 @@
 #include "pch.h"
-#include "../SmartCalculatorLib/Node.h"
+#include "Tree.h"
 
 class BasicOperatorEvalTest : public :: testing::Test
 {
 protected:
-	unique_ptr<Node> addOneTwo;
-	unique_ptr<Node> minusTwoThree;
-	unique_ptr<Node> timesTwoThree;
-	unique_ptr<Node> devideSixThree;
-	unique_ptr<Node> powerTwoThree;
-	unique_ptr<Node> sinHalfPi;
+	std::unique_ptr<Node> addOneTwo;
+	std::unique_ptr<Node> minusTwoThree;
+	std::unique_ptr<Node> timesTwoThree;
+	std::unique_ptr<Node> devideSixThree;
+	std::unique_ptr<Node> powerTwoThree;
+	std::unique_ptr<Node> sinHalfPi;
 	
 	void SetUp() override
 	{
-		addOneTwo = make_unique<TNode<Oper>>(TNode<Oper>(Oper::Plus, new TNode<double>(1), new TNode<double>(2)));
-		minusTwoThree = make_unique<TNode<Oper>>(TNode<Oper>(Oper::Plus, new TNode<double>(2), new TNode<double>(-3)));
-		timesTwoThree = make_unique<TNode<Oper>>(TNode<Oper>(Oper::Times, new TNode<double>(2), new TNode<double>(3)));
-		devideSixThree = make_unique<TNode<Oper>>(TNode<Oper>(Oper::DevidedBy, new TNode<double>(6), new TNode<double>(3)));
-		powerTwoThree = make_unique<TNode<Oper>>(TNode<Oper>(Oper::Power, new TNode<double>(2), new TNode<double>(4)));
-		sinHalfPi = make_unique<TNode<Oper>>(TNode<Oper>(Oper::Sin, new TNode<double>(M_PI_2)));
+		addOneTwo = std::make_unique<TNode<Oper>>(TNode<Oper>(Oper::Plus, new TNode<double>(1), new TNode<double>(2)));
+		minusTwoThree = std::make_unique<TNode<Oper>>(TNode<Oper>(Oper::Plus, new TNode<double>(2), new TNode<double>(-3)));
+		timesTwoThree = std::make_unique<TNode<Oper>>(TNode<Oper>(Oper::Times, new TNode<double>(2), new TNode<double>(3)));
+		devideSixThree = std::make_unique<TNode<Oper>>(TNode<Oper>(Oper::DevidedBy, new TNode<double>(6), new TNode<double>(3)));
+		powerTwoThree = std::make_unique<TNode<Oper>>(TNode<Oper>(Oper::Power, new TNode<double>(2), new TNode<double>(4)));
+		sinHalfPi = std::make_unique<TNode<Oper>>(TNode<Oper>(Oper::Sin, new TNode<double>(M_PI_2)));
 	}
 
 };
 
 TEST(BuildTreeTest, HandlesBuildingAdditionTree) {
-	auto result = BuildTree("1+2");
+	Tree tree = Tree("1+2");
+	tree.Build();
 
-	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	auto op = dynamic_cast<TNode<Oper>*>(tree.trunk.get());
 	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Plus);
 	auto lc = dynamic_cast<TNode<double>*>(op->leftChild);
@@ -38,9 +39,10 @@ TEST(BuildTreeTest, HandlesBuildingAdditionTree) {
 }
 
 TEST(BuildTreeTest, HandlesBuildingDoubleMinusTree) {
-	auto result = BuildTree("1--2");
+	Tree tree = Tree("1--2");
+	tree.Build();
 
-	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	auto op = dynamic_cast<TNode<Oper>*>(tree.trunk.get());
 	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Plus);
 	auto lc = dynamic_cast<TNode<double>*>(op->leftChild);
@@ -52,9 +54,10 @@ TEST(BuildTreeTest, HandlesBuildingDoubleMinusTree) {
 }
 
 TEST(BuildTreeTest, HandlesBuildingSubtractionTree) {
-	auto result = BuildTree("1-2");
+	Tree tree = Tree("1-2");
+	tree.Build();
 
-	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	auto op = dynamic_cast<TNode<Oper>*>(tree.trunk.get());
 	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Plus);
 	auto lc = dynamic_cast<TNode<double>*>(op->leftChild);
@@ -70,9 +73,10 @@ TEST(BuildTreeTest, HandlesBuildingSubtractionTree) {
 }
 
 TEST(BuildTreeTest, HandlesBuildingCosTree) {
-	auto result = BuildTree("cos(1.57)");
+	Tree tree = Tree("cos(1.57)");
+	tree.Build();
 
-	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	auto op = dynamic_cast<TNode<Oper>*>(tree.trunk.get());
 	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Cos);
 	auto lc = dynamic_cast<TNode<double>*>(op->leftChild);
@@ -81,9 +85,10 @@ TEST(BuildTreeTest, HandlesBuildingCosTree) {
 }
 
 TEST(BuildTreeTest, HandlesBuildingCosTreeBinaryBehind) {
-	auto result = BuildTree("cos(1.57)+3");
+	Tree tree = Tree("cos(1.57)+3");
+	tree.Build();
 
-	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	auto op = dynamic_cast<TNode<Oper>*>(tree.trunk.get());
 	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Plus);
 	auto lc = dynamic_cast<TNode<Oper>*>(op->leftChild);
@@ -129,9 +134,10 @@ TEST_F(BasicOperatorEvalTest, HandlesSin)
 
 TEST(ParenthesesTreeBuildingTest, HandlesSinglePointlessParentheses)
 {
-	auto result = BuildTree("(1-2)");
+	Tree tree = Tree("(1-2)");
+	tree.Build();
 
-	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	auto op = dynamic_cast<TNode<Oper>*>(tree.trunk.get());
 	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Plus);
 	auto lc = dynamic_cast<TNode<double>*>(op->leftChild);
@@ -147,9 +153,10 @@ TEST(ParenthesesTreeBuildingTest, HandlesSinglePointlessParentheses)
 
 TEST(ParenthesesTreeBuildingTest, HandlesMultipleNestedPointlessParentheses)
 {
-	auto result = BuildTree("(((((1-2)))))");
+	Tree tree = Tree("(((((1-2)))))");
+	tree.Build();
 
-	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	auto op = dynamic_cast<TNode<Oper>*>(tree.trunk.get());
 	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Plus);
 	auto lc = dynamic_cast<TNode<double>*>(op->leftChild);
@@ -165,9 +172,10 @@ TEST(ParenthesesTreeBuildingTest, HandlesMultipleNestedPointlessParentheses)
 
 TEST(ParenthesesTreeBuildingTest, HandlesMultipleParentheses)
 {
-	auto result = BuildTree("(1-2)*(5+5)");
+	Tree tree = Tree("(1-2)*(5+5)");
+	tree.Build();
 
-	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	auto op = dynamic_cast<TNode<Oper>*>(tree.trunk.get());
 	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Times);
 	auto lc = dynamic_cast<TNode<Oper>*>(op->leftChild);
@@ -183,9 +191,10 @@ TEST(ParenthesesTreeBuildingTest, HandlesMultipleParentheses)
 
 TEST(ParenthesesTreeBuildingTest, HandlesNegativeParentheses)
 {
-	auto result = BuildTree("-(5+3)");
+	Tree tree = Tree("-(5+3)");
+	tree.Build();
 
-	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	auto op = dynamic_cast<TNode<Oper>*>(tree.trunk.get());
 	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Negative);
 	auto lc = dynamic_cast<TNode<Oper>*>(op->leftChild);
@@ -198,9 +207,10 @@ TEST(ParenthesesTreeBuildingTest, HandlesNegativeParentheses)
 
 TEST(ParenthesesTreeBuildingTest, HandlesMultipleNestedParentheses)
 {
-	auto result = BuildTree("((1-2)*(5+5))/5");
+	Tree tree = Tree("((1-2)*(5+5))/5");
+	tree.Build();
 
-	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	auto op = dynamic_cast<TNode<Oper>*>(tree.trunk.get());
 	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::DevidedBy);
 	auto lc = dynamic_cast<TNode<Oper>*>(op->leftChild);
@@ -222,9 +232,10 @@ TEST(ParenthesesTreeBuildingTest, HandlesMultipleNestedParentheses)
 
 TEST(ParenthesesTreeBuildingTest, HandlesMultipleParenthesesWithUnary)
 {
-	auto result = BuildTree("(1-2)*cos(2*3.14)");
+	Tree tree = Tree("(1-2)*cos(2*3.14)");
+	tree.Build();
 
-	auto op = dynamic_cast<TNode<Oper>*>(result.get());
+	auto op = dynamic_cast<TNode<Oper>*>(tree.trunk.get());
 	ASSERT_TRUE(op != NULL);
 	EXPECT_EQ(op->value, Oper::Times);
 	auto lc = dynamic_cast<TNode<Oper>*>(op->leftChild);
@@ -246,16 +257,25 @@ TEST(ParenthesesTreeBuildingTest, HandlesMultipleParenthesesWithUnary)
 
 TEST(NondebugableComplexMathBuildEvalTest, HandlesManyPlusMinus)
 {
-	auto tree = BuildTree("5+3-5-5+9+9-4-2-5+8+2354-54+8+2+54-5--54");
-	auto result = EvalTree(tree.get());
+	Tree tree = Tree("5+3-5-5+9+9-4-2-5+8+2354-54+8+2+54-5--54");
+	tree.Build();
+	auto result = tree.Eval();
 
 	EXPECT_DOUBLE_EQ(result, 2426);
 }
 
 TEST(NondebugableComplexMathBuildEvalTest, HandlesManyBinaryOperators)
 {
-	auto tree = BuildTree("(5*(35-(3*874)+99*89))/(5+700-3*9)");
-	auto result = EvalTree(tree.get());
+	Tree tree = Tree("(5*(35-(3*874)+99*89))/(5+700-3*9)");
+	tree.Build();
+	auto result = tree.Eval();
 
 	EXPECT_DOUBLE_EQ(result, 45.89970501474926);
+}
+
+TEST(BuildFunctionTree, HandlesOneVariable)
+{
+	Tree tree = Tree("2*x^2+3*x-5");
+	tree.Build();
+	ASSERT_TRUE(tree.IsFunction());
 }

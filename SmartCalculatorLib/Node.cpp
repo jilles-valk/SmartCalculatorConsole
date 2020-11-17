@@ -251,14 +251,24 @@ LMR FindLMR(string::const_iterator left, string::const_iterator right)
 
 Node* BuildTreeRecursive(LMR const & lmr)
 {
+	string sVal;
 
+	// numeric value or variable
 	if (lmr.middle.begOp == lmr.right)
 	{
-		try
+		char* p;
+		sVal = std::string(lmr.left, lmr.right);
+
+		double value = strtod(sVal.c_str(), &p);
+		if (*p == 0)
 		{
-			return new TNode<double>(stod(string(lmr.left, lmr.right)), nullptr, nullptr);
+			return new TNode<double>(value, nullptr, nullptr);
 		}
-		catch (invalid_argument const& ia)
+		else if (mapUnaryOper.count(sVal) == 0 && std::all_of(lmr.left, lmr.right, [](char const & c) {return isalpha(c); }))
+		{
+			return new TNode<string>(sVal, nullptr, nullptr);
+		}
+		else
 		{
 			throw ValueParseException(lmr.left, lmr.right);
 		}
@@ -266,8 +276,8 @@ Node* BuildTreeRecursive(LMR const & lmr)
 
 	LMR leftLMR;
 	LMR rightLMR;
-	string oper;
-
+	
+	// unary operator
 	if (lmr.left == lmr.middle.begOp)
 	{
 		if (lmr.middle.endOp != lmr.right)
@@ -279,18 +289,18 @@ Node* BuildTreeRecursive(LMR const & lmr)
 			throw ValueParseException(lmr.middle.endOp, lmr.right);
 		}
 
-		oper = string(lmr.middle.begOp, lmr.middle.endOp);
+		sVal = string(lmr.middle.begOp, lmr.middle.endOp);
 
-		if (mapUnaryOper.count(oper) > 0)
+		if (mapUnaryOper.count(sVal) > 0)
 		{
-			return new TNode<Oper>(mapUnaryOper.at(oper), BuildTreeRecursive(leftLMR));
+			return new TNode<Oper>(mapUnaryOper.at(sVal), BuildTreeRecursive(leftLMR));
 		}
 		else
 		{
 			throw NoValidOperatorException(lmr.middle.begOp, lmr.middle.endOp);
 		}
 	}
-	else
+	else //binary operator
 	{
 		leftLMR = FindLMR(lmr.left, lmr.middle.begOp);
 
@@ -304,11 +314,11 @@ Node* BuildTreeRecursive(LMR const & lmr)
 		}
 	}
 
-	oper = string(lmr.middle.begOp, lmr.middle.endOp);
+	sVal = string(lmr.middle.begOp, lmr.middle.endOp);
 
-	if (mapBinaryOper.count(oper) > 0)
+	if (mapBinaryOper.count(sVal) > 0)
 	{
-		return new TNode<Oper>(mapBinaryOper.at(oper), BuildTreeRecursive(leftLMR), BuildTreeRecursive(rightLMR));
+		return new TNode<Oper>(mapBinaryOper.at(sVal), BuildTreeRecursive(leftLMR), BuildTreeRecursive(rightLMR));
 	}
 	else
 	{
@@ -359,4 +369,31 @@ double EvalTree(Node* const &node)
 
 	return nan("");
 }
+
+//or just fill a vector with the variables one finds
+bool Node::HasVariableNode()
+{
+	auto var = dynamic_cast<TNode<string>*>(this);
+
+	if (var != NULL)
+	{
+		return true;
+	}
+
+	if (leftChild == nullptr && rightChild == nullptr)
+	{
+		return false;
+	}
+	else if (leftChild != nullptr && rightChild != nullptr)
+	{
+		return leftChild->HasVariableNode() || rightChild->HasVariableNode();
+	}
+	else if (leftChild != nullptr)
+	{
+		return rightChild->HasVariableNode();
+	}
+
+	return leftChild->HasVariableNode();
+}
+
 
