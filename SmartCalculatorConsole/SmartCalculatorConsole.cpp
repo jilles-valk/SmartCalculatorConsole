@@ -10,7 +10,7 @@ using namespace std;
 static string const operators = "*/+";
 
 template<typename F, typename... Args>
-double TimeFunction(int numRuns, string name, F& const func, Args&&... args)
+double TimeFunction(int numRuns, string name, F const & func, Args&&... args)
 {
     auto start = chrono::high_resolution_clock::now();
 
@@ -21,7 +21,7 @@ double TimeFunction(int numRuns, string name, F& const func, Args&&... args)
         i++;
     }
 
-    auto duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count();
+    double duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count();
     cout << "Function " << name << " executed " << numRuns << " times in " << duration << " microseconds" << endl;
     
     return duration;
@@ -61,16 +61,4 @@ int main()
     auto dur = TimeFunction(1000, "BuildTree", BuildTree, tree.parsedInput);
 
     auto dur2 = TimeFunction(1000, "EvalTree", EvalTree, tree.trunk.get());
-
-    auto start = chrono::high_resolution_clock::now();
-    int i = 0;
-    while (i < 1000)
-    {
-        find(begin(s), end(s), ')');
-        i++;
-    }
-    find(begin(s), end(s), ')');
-
-    auto duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count();
-    cout << "Find executed in " << duration << " microseconds" << endl;
 }

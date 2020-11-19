@@ -2,9 +2,7 @@
 
 #include "Node.h"
 #include "Exceptions.h"
-#include <vector>
 #include <regex>
-#include <unordered_map>
 #include <cmath>
 #include <exception>
 
@@ -42,7 +40,7 @@ struct LMR
 
 
 //copy constructor
-Node::Node(Node & const source)
+Node::Node(Node const & source)
 {
 	if (source.leftChild != nullptr && source.rightChild != nullptr)
 	{
@@ -54,7 +52,7 @@ Node::Node(Node & const source)
 	}
 }
 
-Node & Node::operator=(Node & const node)
+Node & Node::operator=(Node node)
 {
 	if (node.leftChild != nullptr)
 	{
@@ -343,7 +341,7 @@ double EvalTree(Node* const &node)
 			return pow(EvalTree(node->leftChild), EvalTree(node->rightChild));
 		case Oper::Times:
 			return EvalTree(node->leftChild) * EvalTree(node->rightChild);
-		case Oper::DevidedBy :
+		case Oper::DevidedBy:
 			return EvalTree(node->leftChild) / EvalTree(node->rightChild);
 		case Oper::Plus:
 			return EvalTree(node->leftChild) + EvalTree(node->rightChild);
@@ -370,7 +368,6 @@ double EvalTree(Node* const &node)
 	return nan("");
 }
 
-//or just fill a vector with the variables one finds
 bool Node::HasVariableNode()
 {
 	auto var = dynamic_cast<TNode<string>*>(this);
@@ -390,10 +387,52 @@ bool Node::HasVariableNode()
 	}
 	else if (leftChild != nullptr)
 	{
-		return rightChild->HasVariableNode();
+		return leftChild->HasVariableNode();
 	}
 
-	return leftChild->HasVariableNode();
+	return rightChild->HasVariableNode();
 }
 
+std::unordered_map<std::string, std::vector<Node**>> Node::GetVariableChildNodes(std::unordered_map<std::string, std::vector<Node**>>& vars)
+{
+	auto var = dynamic_cast<TNode<string>*>(leftChild);
+
+	if (var != NULL)
+	{
+		if (vars.count(var->value) > 0)
+		{
+			vars.at(var->value).push_back(&leftChild);
+		}
+		else
+		{
+			vars.insert(std::make_pair(var->value, vector<Node**>{ &leftChild }));
+		}
+	}
+	
+	var = dynamic_cast<TNode<string>*>(rightChild);
+
+	if (var != NULL)
+	{
+		if (vars.count(var->value) > 0)
+		{
+			vars.at(var->value).push_back(&rightChild);
+		}
+		else
+		{
+			vars.insert(std::make_pair(var->value, vector<Node**>{ &rightChild }));
+		}
+	}
+
+	if (leftChild != nullptr)
+	{
+		leftChild->GetVariableChildNodes(vars);
+	}
+
+	if (rightChild != nullptr)
+	{
+		rightChild->GetVariableChildNodes(vars);
+	}
+
+	return vars;
+}
 

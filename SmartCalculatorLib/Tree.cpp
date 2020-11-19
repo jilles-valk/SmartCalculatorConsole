@@ -1,5 +1,6 @@
 #include "Tree.h"
 #include <sstream>
+#include <algorithm>
 
 void Tree::Build()
 {
@@ -8,6 +9,8 @@ void Tree::Build()
 	try
 	{
 		trunk = BuildTree(parsedInput);
+
+		this->GetVariables();
 	}
 	catch(TreeBuildingException e)
 	{
@@ -36,6 +39,35 @@ double Tree::IsFunction()
 	return trunk.get()->HasVariableNode();
 }
 
+bool Tree::GetVariables()
+{
+	std::unordered_map<std::string, std::vector<Node**>> input;
+	variables = trunk.get()->GetVariableChildNodes(input);
+
+	return !variables.empty();
+}
+
+bool Tree::SetVariables(std::unordered_map<std::string, double> vars)
+{
+	return std::all_of(std::begin(vars), std::end(vars), [this](std::pair<std::string, double> nameVal) {
+		return SetVariable(nameVal);
+		});
+}
+
+bool Tree::SetVariable(std::pair<std::string, double> var)
+{
+	if (variables.count(var.first) > 0)
+	{
+		for_each(begin(variables.at(var.first)), end(variables.at(var.first)), [&var](Node** n) {
+			delete *n; 
+			*n = new TNode<double>(var.second);
+			});
+
+		return true;
+	}
+	return false;
+}
+
 void Tree::ParseInput(std::string const& input)
 {
 	static std::string const operators = "*/+";
@@ -44,7 +76,7 @@ void Tree::ParseInput(std::string const& input)
 
 	ss << input[0];
 
-	for (int i = 1; i < input.size(); i++)
+	for (unsigned int i = 1; i < input.size(); i++)
 	{
 		// turn -x into + -x so that the order of adding and subtracting does not matter
 		if (input[i] == '-')

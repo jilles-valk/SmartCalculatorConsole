@@ -279,3 +279,95 @@ TEST(BuildFunctionTree, HandlesOneVariable)
 	tree.Build();
 	ASSERT_TRUE(tree.IsFunction());
 }
+
+TEST(BuildFunctionTree, GetOneVariable)
+{
+	Tree tree = Tree("2*x^2+3*x-5");
+	tree.Build();
+	ASSERT_TRUE(tree.GetVariables());
+
+	auto var = dynamic_cast<TNode<std::string>*>(*tree.variables["x"][0]);
+	ASSERT_TRUE(var != NULL);
+	EXPECT_EQ(var->value, "x");
+
+	var = dynamic_cast<TNode<std::string>*>(*tree.variables["x"][1]);
+	ASSERT_TRUE(var != NULL);
+	EXPECT_EQ(var->value, "x");
+}
+
+TEST(BuildFunctionTree, GetMultipleVariables)
+{
+	Tree tree = Tree("2*x^2+3*y-z");
+	tree.Build();
+	ASSERT_TRUE(tree.GetVariables());
+
+	auto var = dynamic_cast<TNode<std::string>*>(*tree.variables["x"][0]);
+	ASSERT_TRUE(var != NULL);
+	EXPECT_EQ(var->value, "x");
+
+	var = dynamic_cast<TNode<std::string>*>(*tree.variables["y"][0]);
+	ASSERT_TRUE(var != NULL);
+	EXPECT_EQ(var->value, "y");
+
+	var = dynamic_cast<TNode<std::string>*>(*tree.variables["z"][0]);
+	ASSERT_TRUE(var != NULL);
+	EXPECT_EQ(var->value, "z");
+}
+
+TEST(SetFunctionTree, SetOneVariable)
+{
+	Tree tree = Tree("2*x^2+3*x-5");
+	tree.Build();
+	ASSERT_TRUE(tree.SetVariable(std::make_pair<std::string, double>("x", 0)));
+
+	auto var = dynamic_cast<TNode<double>*>(*tree.variables["x"][0]);
+	ASSERT_TRUE(var != NULL);
+	EXPECT_EQ(var->value, 0);
+
+	var = dynamic_cast<TNode<double>*>(*tree.variables["x"][1]);
+	ASSERT_TRUE(var != NULL);
+	EXPECT_EQ(var->value, 0);
+
+	double result = tree.Eval();
+	ASSERT_DOUBLE_EQ(result, -5);
+}
+
+TEST(SetFunctionTree, SetOneVariableTwice)
+{
+	Tree tree = Tree("2*x^2+3*x-5");
+	tree.Build();
+	ASSERT_TRUE(tree.SetVariable(std::make_pair<std::string, double>("x", 0)));
+
+	auto var = dynamic_cast<TNode<double>*>(*tree.variables["x"][0]);
+	ASSERT_TRUE(var != NULL);
+	EXPECT_EQ(var->value, 0);
+
+	double result = tree.Eval();
+	ASSERT_DOUBLE_EQ(result, -5);
+
+	ASSERT_TRUE(tree.SetVariable(std::make_pair<std::string, double>("x", 1)));
+
+    result = tree.Eval();
+	ASSERT_DOUBLE_EQ(result, 0);
+}
+
+TEST(SetFunctionTree, SetMultipleVariables)
+{
+	Tree tree = Tree("2*x^2+3*y-z");
+	tree.Build();
+
+	auto map = std::unordered_map<std::string, double>{ {"x", 4}, { "y", 5 }, { "z", 6 }};
+	ASSERT_TRUE(tree.SetVariables(map));
+
+	auto var = dynamic_cast<TNode<double>*>(*tree.variables["x"][0]);
+	ASSERT_TRUE(var != NULL);
+	EXPECT_DOUBLE_EQ(var->value, 4);
+
+	var = dynamic_cast<TNode<double>*>(*tree.variables["y"][0]);
+	ASSERT_TRUE(var != NULL);
+	EXPECT_DOUBLE_EQ(var->value, 5);
+
+	var = dynamic_cast<TNode<double>*>(*tree.variables["z"][0]);
+	ASSERT_TRUE(var != NULL);
+	EXPECT_DOUBLE_EQ(var->value, 6);
+}

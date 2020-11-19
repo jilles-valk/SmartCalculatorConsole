@@ -3,6 +3,8 @@
 #include <memory>
 #include <utility>
 #include <iostream>
+#include <vector>
+#include <unordered_map>
 
 enum class Oper {None, Times, DevidedBy, Power, Plus, Negative, Sin, Cos, Tan};
 
@@ -15,13 +17,15 @@ public:
 	Node() : leftChild{ nullptr }, rightChild{ nullptr } {};
 	Node(Node* leftChild) : leftChild{ leftChild } {};
 	Node(Node* leftChild, Node* rightChild) : leftChild{ leftChild }, rightChild{ rightChild } {};
-	Node(Node& const source);
-	Node(Node&& source) : leftChild{ source.leftChild }, rightChild{ source.rightChild } {source.leftChild = nullptr; source.rightChild = nullptr; }
-	Node& operator=(Node& const node);
+	Node(Node const & source);
+	Node(Node&& source) noexcept : leftChild{ source.leftChild }, rightChild{ source.rightChild } {source.leftChild = nullptr; source.rightChild = nullptr; };
+	Node& operator=(Node node);
 	friend void swap(Node& b1, Node& b2);
 	~Node() { delete leftChild; delete rightChild; /*cout << "Deleting node" << endl;*/ };
 
 	bool HasVariableNode();
+	std::unordered_map<std::string, std::vector<Node**>> GetVariableChildNodes(std::unordered_map<std::string, std::vector<Node**>>& vars);
+
 	virtual void dummy() {}
 };
 
@@ -35,10 +39,8 @@ public:
 	TNode(T value, Node* leftChild) : value{ value }, Node{ leftChild }{};
 	TNode(T value, Node* leftChild, Node* rightChild) : value{ value }, Node{ leftChild, rightChild }{};
 
-	bool HasVariableNode();
 	T GetValue() { return value; };
 };
-
 
 std::unique_ptr<Node> BuildTree(std::string const & input);
 double EvalTree(Node* const & node);
