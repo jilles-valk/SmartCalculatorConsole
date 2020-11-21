@@ -15,11 +15,14 @@ private:
 	void OnDraw(wxDC& dc);
 	void OnPaint(wxPaintEvent& evt);
 	void DrawGraph(wxDC& dc);
+	void DrawAxis(wxDC& dc);
 
 private:
 	int numPoints = 1000;
 	Function function;
 	std::vector<std::pair<double, double>> graphPoints;
+	size_t canvasHeight = 1000;
+	size_t canvasWidth = 1000;
 
 };
 

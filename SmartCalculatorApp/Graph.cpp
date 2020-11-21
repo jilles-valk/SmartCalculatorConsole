@@ -22,17 +22,53 @@ void Graph::GenerateFunction(Tree t)
 	this->Refresh(false);
 }
 
+
+
 void Graph::DrawGraph(wxDC& dc)
 {
+	wxPen pen = dc.GetPen();
+	pen.SetStyle(wxPENSTYLE_SOLID);
+	pen.SetColour(51, 51, 255);
+	pen.SetWidth(1);
+	dc.SetPen(pen);
+
 	std::vector<Point>::const_iterator begin = std::cbegin(function.graph);
 	std::vector<Point>::const_iterator end = std::cend(function.graph);
+
+	double translateX = (canvasWidth / (function.upperRight.x - function.lowerLeft.x));
+	double translateY = -(canvasHeight / (function.upperRight.y - function.lowerLeft.y));
+
+	double shiftX = 0.5 * canvasWidth;
+	double shiftY = 0.5 * canvasHeight;
 
 	if (begin != end) {
 		for (auto curr = begin, next = std::next(begin); next != end; curr++, next++) 
 		{
-			dc.DrawLine((*curr).x, (*curr).y, (*next).x, (*next).y);
+			dc.DrawLine(translateX * (*curr).x + shiftX, translateY * (*curr).y+ shiftY, translateX * (*next).x + shiftX, translateY * (*next).y+ shiftY);
 		}
 	}
+}
+
+void Graph::DrawAxis(wxDC& dc)
+{
+	wxPen pen = dc.GetPen();
+
+	pen.SetStyle(wxPENSTYLE_SOLID);
+	dc.SetPen(pen);
+
+	dc.DrawLine(0, 0.5 * canvasHeight, canvasWidth, 0.5 * canvasHeight);
+	dc.DrawLine(0.5 * canvasWidth, 0, 0.5 * canvasWidth, canvasHeight);
+
+	pen.SetStyle(wxPENSTYLE_VERTICAL_HATCH);
+	pen.SetWidth(10);
+	dc.SetPen(pen);
+
+	dc.DrawLine(0, 0.5 * canvasHeight, canvasWidth, 0.5 * canvasHeight);
+
+	pen.SetStyle(wxPENSTYLE_HORIZONTAL_HATCH);
+	dc.SetPen(pen);
+
+	dc.DrawLine(0.5 * canvasWidth, 0, 0.5 * canvasWidth, canvasHeight);
 }
 
 void Graph::OnDraw(wxDC& dc)
@@ -45,11 +81,8 @@ void Graph::OnDraw(wxDC& dc)
 	dc.SetPen(pen);
 	dc.SetBrush(brush);
 
-	dc.DrawRectangle(20, 20, 200, 200);
-
-	wxPoint points[3] = { wxPoint(100, 100), wxPoint(200, 200), wxPoint(300, 250) };
-	dc.DrawLines(3, points);
-
+	DrawAxis(dc);
+		
 	DrawGraph(dc);
 }
 

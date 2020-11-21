@@ -61,7 +61,7 @@ void Main::OnPressedEnter(wxCommandEvent& evt)
 	}
 	else
 	{
-		//(*graph).GenerateFunction(tree);
+		(*graph).GenerateFunction(tree);
 
 		input->SetStyle(0, input->GetLastPosition(), wxTextAttr(*wxBLACK));
 		output->SetDefaultStyle(wxTextAttr(*wxBLACK));
