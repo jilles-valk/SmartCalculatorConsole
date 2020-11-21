@@ -2,6 +2,16 @@
 #include <sstream>
 #include <algorithm>
 
+Tree& Tree::operator=(Tree source) 
+{
+	std::swap(originalInput, source.originalInput);
+	std::swap(parsedInput, source.parsedInput);
+	std::swap(variables, source.variables);
+	std::swap(trunk, source.trunk);
+	std::swap(tbe, source.tbe);
+	return *this;
+}
+
 void Tree::Build()
 {
 	ParseInput(originalInput);
@@ -34,7 +44,7 @@ int Tree::GetEndIndexException()
 	return tbe.right - cbegin(parsedInput);
 }
 
-double Tree::IsFunction()
+bool Tree::IsFunction()
 {
 	return trunk.get()->HasVariableNode();
 }

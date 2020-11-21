@@ -324,7 +324,7 @@ Node* BuildTreeRecursive(LMR const & lmr)
 	}
 }
 
-unique_ptr<Node> BuildTree(string const & input)
+shared_ptr<Node> BuildTree(string const & input)
 {
 	return unique_ptr<Node>(BuildTreeRecursive(FindLMR(cbegin(input), cend(input))));
 }

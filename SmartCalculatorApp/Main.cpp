@@ -1,5 +1,6 @@
 #include "Main.h"
 #include "Tree.h"
+//#include "Graph.h"
 
 
 //wxBEGIN_EVENT_TABLE(Main, wxFrame)
@@ -8,7 +9,11 @@
 
 Main::Main() : wxFrame(nullptr, wxID_ANY, "Calculator", wxPoint(50, 50), wxSize(1000, 1000))
 {
-	wxGridSizer* grid = new wxGridSizer(10, 1, 0, 0);
+	wxFlexGridSizer* grid = new wxFlexGridSizer(3, 1, 0, 0);
+	//wxGridSizer* topGrid = new wxGridSizer(3, 1, 0, 0);
+	//grid->Add(topGrid, 100, wxEXPAND | wxALL);
+	
+
 	wxFont myFont(30, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
 
 	input = new wxTextCtrl(this, 10001, "", wxDefaultPosition, wxDefaultSize, wxTE_RICH);
@@ -23,10 +28,19 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Calculator", wxPoint(50, 50), wxSize(
 	//grid->AddSpacer(1);
 	grid->Add(output, 1, wxEXPAND | wxALL);
 
+	graph = new Graph(this);
+	grid->Add(graph, 1, wxEXPAND);
+	//grid->GetItem(2)->SetInitSize(1000, 1000);
+	//grid->SetFlexibleDirection(wxBOTH);
+	//grid->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_ALL);
+	grid->AddGrowableCol(0);
+	grid->AddGrowableRow(2);
+
+	grid->FitInside(this);
 	this->SetSizer(grid);
 	grid->Layout();
 }
-
+	
 Main::~Main()
 {
 
@@ -47,6 +61,8 @@ void Main::OnPressedEnter(wxCommandEvent& evt)
 	}
 	else
 	{
+		//(*graph).GenerateFunction(tree);
+
 		input->SetStyle(0, input->GetLastPosition(), wxTextAttr(*wxBLACK));
 		output->SetDefaultStyle(wxTextAttr(*wxBLACK));
 
@@ -54,4 +70,6 @@ void Main::OnPressedEnter(wxCommandEvent& evt)
 
 		output->SetLabel(wxString::Format(wxT(" = %f"), result));
 	}
+
+	//evt.Skip();
 }

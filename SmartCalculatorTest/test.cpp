@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Tree.h"
+#include "Function.h"
 
 class BasicOperatorEvalTest : public :: testing::Test
 {
@@ -273,14 +274,14 @@ TEST(NondebugableComplexMathBuildEvalTest, HandlesManyBinaryOperators)
 	EXPECT_DOUBLE_EQ(result, 45.89970501474926);
 }
 
-TEST(BuildFunctionTree, HandlesOneVariable)
+TEST(BuildFunctionTreeTest, HandlesOneVariable)
 {
 	Tree tree = Tree("2*x^2+3*x-5");
 	tree.Build();
 	ASSERT_TRUE(tree.IsFunction());
 }
 
-TEST(BuildFunctionTree, GetOneVariable)
+TEST(BuildFunctionTreeTest, GetOneVariable)
 {
 	Tree tree = Tree("2*x^2+3*x-5");
 	tree.Build();
@@ -295,7 +296,7 @@ TEST(BuildFunctionTree, GetOneVariable)
 	EXPECT_EQ(var->value, "x");
 }
 
-TEST(BuildFunctionTree, GetMultipleVariables)
+TEST(BuildFunctionTreeTest, GetMultipleVariables)
 {
 	Tree tree = Tree("2*x^2+3*y-z");
 	tree.Build();
@@ -314,7 +315,7 @@ TEST(BuildFunctionTree, GetMultipleVariables)
 	EXPECT_EQ(var->value, "z");
 }
 
-TEST(SetFunctionTree, SetOneVariable)
+TEST(SetFunctionTreeTest, SetOneVariable)
 {
 	Tree tree = Tree("2*x^2+3*x-5");
 	tree.Build();
@@ -332,7 +333,7 @@ TEST(SetFunctionTree, SetOneVariable)
 	ASSERT_DOUBLE_EQ(result, -5);
 }
 
-TEST(SetFunctionTree, SetOneVariableTwice)
+TEST(SetFunctionTreeTest, SetOneVariableTwice)
 {
 	Tree tree = Tree("2*x^2+3*x-5");
 	tree.Build();
@@ -351,7 +352,7 @@ TEST(SetFunctionTree, SetOneVariableTwice)
 	ASSERT_DOUBLE_EQ(result, 0);
 }
 
-TEST(SetFunctionTree, SetMultipleVariables)
+TEST(SetFunctionTreeTest, SetMultipleVariables)
 {
 	Tree tree = Tree("2*x^2+3*y-z");
 	tree.Build();
@@ -370,4 +371,18 @@ TEST(SetFunctionTree, SetMultipleVariables)
 	var = dynamic_cast<TNode<double>*>(*tree.variables["z"][0]);
 	ASSERT_TRUE(var != NULL);
 	EXPECT_DOUBLE_EQ(var->value, 6);
+}
+
+TEST(GraphingTest, PlotDefaultView)
+{
+	Tree tree = Tree("2*x");
+	tree.Build();
+
+	Function f = Function(tree);
+	ASSERT_TRUE(f.MakeGraph());
+
+	EXPECT_DOUBLE_EQ(f.graph[0].x, -10);
+	EXPECT_DOUBLE_EQ(f.graph[0].y, -20);
+	EXPECT_DOUBLE_EQ(f.graph[f.graph.size() - 1].x, 10);
+	EXPECT_DOUBLE_EQ(f.graph[f.graph.size() - 1].y, 20);
 }
