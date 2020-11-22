@@ -8,6 +8,10 @@ struct Point
 
 	Point() : x{ 0 }, y{ 0 }{};
 	Point(double x, double y) : x{ x }, y{ y }{};
+
+	Point operator + (Point const& p2) { return Point{ x + p2.x, y + p2.y }; };
+	Point operator - (Point const& p2) { return Point{ x - p2.x, y - p2.y }; };
+	Point operator * (double const& scalar) { return Point{ scalar * x, scalar * y }; };
 };
 
 class Function
@@ -15,13 +19,14 @@ class Function
 public:
 	Tree tree;
 	std::vector<Point> graph;
-	Point lowerLeft;
-	Point upperRight;
-	unsigned int numPoints;
+	Point upperLeft;
+	Point lowerRight;
+	unsigned int numPoints = 1000;
 	std::string varName;
 
 	Function() = default;
-	Function(Tree tree) : tree{ tree }, lowerLeft{ -10, -10 }, upperRight{ 10, 10 }, numPoints{ 1000 }, varName{ "x" } {};
+	Function(Tree tree) : tree{ tree }, upperLeft{ -10, 10 }, lowerRight{ 10, -10 },  varName{ "x" } {};
+	Function(Tree tree, size_t numPoints) : tree{ tree }, upperLeft{ -10, 10 }, lowerRight{ 10, -10 }, numPoints{ numPoints }, varName{ "x" } {};
 	
 	
 	bool GetMinMax();

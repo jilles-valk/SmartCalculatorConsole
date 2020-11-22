@@ -12,8 +12,11 @@ bool Function::SetAutoView()
 
 bool Function::MakeGraph()
 {
-	double dx = (upperRight.x - lowerLeft.x)/(numPoints - 1);
-	double x = lowerLeft.x;
+	double dx = (lowerRight.x - upperLeft.x)/(numPoints - 1);
+	double x = upperLeft.x;
+
+	graph.clear();
+	graph.reserve(numPoints);
 
 	for (int i = 0; i < numPoints; i++)
 	{

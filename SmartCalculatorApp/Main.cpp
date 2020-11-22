@@ -1,6 +1,5 @@
 #include "Main.h"
 #include "Tree.h"
-//#include "Graph.h"
 
 
 //wxBEGIN_EVENT_TABLE(Main, wxFrame)
@@ -29,6 +28,8 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Calculator", wxPoint(50, 50), wxSize(
 	grid->Add(output, 1, wxEXPAND | wxALL);
 
 	graph = new Graph(this);
+	//graph->SetVirtualSize(wxSize(2000, 2000));
+	//graph->SetScrollRate(1, 1);
 	grid->Add(graph, 1, wxEXPAND);
 	//grid->GetItem(2)->SetInitSize(1000, 1000);
 	//grid->SetFlexibleDirection(wxBOTH);
@@ -43,7 +44,6 @@ Main::Main() : wxFrame(nullptr, wxID_ANY, "Calculator", wxPoint(50, 50), wxSize(
 	
 Main::~Main()
 {
-
 }
 
 void Main::OnPressedEnter(wxCommandEvent& evt)

@@ -4,7 +4,7 @@
 #include "wx/wx.h"
 #include <utility>
 
-class Graph : public wxScrolledWindow
+class Graph : public wxScrolledCanvas
 {
 public:
 	Graph(wxFrame* parent);
@@ -14,6 +14,10 @@ public:
 private:
 	void OnDraw(wxDC& dc);
 	void OnPaint(wxPaintEvent& evt);
+	void OnResize(wxSizeEvent& evt);
+	void OnZoom(wxMouseEvent& evt);
+	Point ScreenToFunctionCoord(wxPoint p);
+	wxPoint FunctionToScreenCoord(Point p);
 	void DrawGraph(wxDC& dc);
 	void DrawAxis(wxDC& dc);
 

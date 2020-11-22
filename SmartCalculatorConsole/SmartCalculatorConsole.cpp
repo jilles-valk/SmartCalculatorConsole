@@ -1,3 +1,8 @@
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
+
 #include <iostream>
 #include <string>
 #include <chrono>
@@ -29,6 +34,7 @@ double TimeFunction(int numRuns, string name, F const & func, Args&&... args)
 
 int main()
 {
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     Tree tree;
 
     while (true)
@@ -47,18 +53,18 @@ int main()
 
         cout << input << " = " << std::setprecision(15) << res << endl;
 
-        auto dur = TimeFunction(1000, "BuildTree", BuildTree, tree.parsedInput);
+        auto dur = TimeFunction(1, "BuildTree", BuildTree, tree.parsedInput);
 
-        auto dur2 = TimeFunction(1000, "EvalTree", EvalTree, tree.trunk.get());
+        auto dur2 = TimeFunction(1, "EvalTree", EvalTree, tree.trunk.get());
     }
 
-    string s = "(5*(35-(3*874)+99*89))/(5+700-3*9)/sin(2)";
+    //string s = "(5*(35-(3*874)+99*89))/(5+700-3*9)/sin(2)";
 
-    tree = Tree(s);
+    //tree = Tree(s);
 
-    tree.Build();
-    
-    auto dur = TimeFunction(1000, "BuildTree", BuildTree, tree.parsedInput);
+    //tree.Build();
+    //
+    //auto dur = TimeFunction(1000, "BuildTree", BuildTree, tree.parsedInput);
 
-    auto dur2 = TimeFunction(1000, "EvalTree", EvalTree, tree.trunk.get());
+    //auto dur2 = TimeFunction(1000, "EvalTree", EvalTree, tree.trunk.get());
 }
