@@ -13,6 +13,8 @@ public:
 
 private:
 	void OnDraw(wxDC& dc);
+	void OnLeftDown(wxMouseEvent& evt);
+	void OnMove(wxMouseEvent& evt);
 	void OnPaint(wxPaintEvent& evt);
 	void OnResize(wxSizeEvent& evt);
 	void OnZoom(wxMouseEvent& evt);
@@ -23,6 +25,7 @@ private:
 
 private:
 	int numPoints = 1000;
+	wxPoint clickPos;
 	Function function;
 	std::vector<std::pair<double, double>> graphPoints;
 	size_t canvasHeight = 1000;

@@ -11,6 +11,8 @@ Graph::Graph(wxFrame* parent) : wxScrolledCanvas(parent, wxID_ANY)
 	Bind(wxEVT_PAINT, &Graph::OnPaint, this);
 	Bind(wxEVT_SIZE, &Graph::OnResize, this);
 	Bind(wxEVT_MOUSEWHEEL, &Graph::OnZoom, this);
+	Bind(wxEVT_MOTION, &Graph::OnMove, this);
+	Bind(wxEVT_LEFT_DOWN, &Graph::OnLeftDown, this);
 }
 void Graph::SetGraph(std::vector<std::pair<double, double>> graph)
 {
@@ -57,23 +59,10 @@ void Graph::DrawAxis(wxDC& dc)
 	pen.SetStyle(wxPENSTYLE_SOLID);
 	dc.SetPen(pen);
 
-
-	//dc.DrawLine(0, 0.5 * canvasHeight, canvasWidth, 0.5 * canvasHeight);
 	dc.DrawLine(FunctionToScreenCoord(Point(0, function.upperLeft.y)),
 		FunctionToScreenCoord(Point(0, function.lowerRight.y)));
 	dc.DrawLine(FunctionToScreenCoord(Point(function.upperLeft.x, 0)),
 		FunctionToScreenCoord(Point(function.lowerRight.x, 0)));
-
-	//pen.SetStyle(wxPENSTYLE_VERTICAL_HATCH);
-	//pen.SetWidth(10);
-	//dc.SetPen(pen);
-
-	//dc.DrawLine(0, 0.5 * canvasHeight, canvasWidth, 0.5 * canvasHeight);
-
-	//pen.SetStyle(wxPENSTYLE_HORIZONTAL_HATCH);
-	//dc.SetPen(pen);
-
-	//dc.DrawLine(0.5 * canvasWidth, 0, 0.5 * canvasWidth, canvasHeight);
 }
 
 void Graph::OnDraw(wxDC& dc)
@@ -89,6 +78,28 @@ void Graph::OnDraw(wxDC& dc)
 	DrawAxis(dc);
 		
 	DrawGraph(dc);
+}
+
+void Graph::OnLeftDown(wxMouseEvent& evt)
+{
+	clickPos = evt.GetPosition();
+}
+
+void Graph::OnMove(wxMouseEvent& evt)
+{
+	if (evt.Dragging() && evt.LeftIsDown())
+	{
+		Point moveV = ScreenToFunctionCoord(clickPos) - ScreenToFunctionCoord(evt.GetPosition());
+
+		function.upperLeft = function.upperLeft + moveV;
+		function.lowerRight = function.lowerRight + moveV;
+
+		clickPos = evt.GetPosition();
+		function.MakeGraph();
+		Refresh();
+	}
+
+	evt.Skip();
 }
 
 void Graph::OnPaint(wxPaintEvent& evt)
@@ -112,6 +123,11 @@ void Graph::OnZoom(wxMouseEvent& evt)
 {
 	double zoomAmount = 0.1 * (evt.GetWheelRotation() / 120);
 	Point mousePos = ScreenToFunctionCoord(evt.GetPosition());
+
+	if (zoomAmount < 0)
+	{
+		zoomAmount = -1/(10 * (1 + zoomAmount));
+	}
 
 	Point tempUpperLeft = function.upperLeft + (mousePos - function.upperLeft) * zoomAmount;
 	function.lowerRight = function.lowerRight + (mousePos - function.lowerRight) * zoomAmount;
