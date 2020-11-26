@@ -80,7 +80,7 @@ bool Tree::SetVariable(std::pair<std::string, double> var)
 
 void Tree::ParseInput(std::string const& input)
 {
-	static std::string const operators = "*/+";
+	static std::string const operators = "*/+^(";
 
 	std::stringstream ss;
 

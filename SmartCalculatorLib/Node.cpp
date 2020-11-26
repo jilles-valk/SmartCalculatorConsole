@@ -9,12 +9,32 @@
 using namespace std;
 
 static regex const binaryOperatorRe("[\\+\\*\\/\\^]");
-static regex const unaryOperatorRe("-|sin|cos|tan|log");
+static regex const unaryOperatorRe("-|sin|asin|sinh|asinh|cos|acos|cosh|acosh|tan|atan|tanh|atanh|log|log10|sqrt");
 
 static vector<char> const opOrder{ '+', '*', '/', '^' };
-static vector<string> const unaryOps{ "-", "sin", "cos", "tan" };
-static unordered_map<string, Oper> const mapUnaryOper = { {"-", Oper::Negative }, {"sin", Oper::Sin }, {"cos", Oper::Cos },{"tan", Oper::Tan } };
-static unordered_map<string, Oper> const mapBinaryOper = { {"*", Oper::Times}, { "/", Oper::DevidedBy }, {"^", Oper::Power } , {"+", Oper::Plus } };
+static vector<string> const unaryOps{"-", "sin", "asin", "sinh", "asinh", "cos", "acos", "cosh", "acosh", "tan", "atan", "tanh", "atanh", "log", "log10", "sqrt" };
+static unordered_map<string, Oper> const mapUnaryOper = {
+	{ "-", Oper::Negative },
+	{ "sin", Oper::Sin },
+	{ "asin", Oper::Asin },
+	{ "sinh", Oper::Sinh },
+	{ "asinh", Oper::Asinh },
+	{ "cos", Oper::Cos },
+	{ "acos", Oper::Acos },
+	{ "cosh", Oper::Cosh },
+	{ "acosh", Oper::Acosh },
+	{ "tan", Oper::Tan },
+	{ "atan", Oper::Atan },
+	{ "tanh", Oper::Tanh },
+	{ "atanh", Oper::Atanh },
+	{ "log", Oper::Log },
+	{ "log10", Oper::Log10 },
+	{ "sqrt", Oper::Sqrt }};
+static unordered_map<string, Oper> const mapBinaryOper = { 
+	{"*", Oper::Times}, 
+	{ "/", Oper::DevidedBy }, 
+	{"^", Oper::Power }, 
+	{"+", Oper::Plus } };
 
 
 
@@ -99,12 +119,16 @@ string::const_iterator FindMatchingClosingParentheses(string::const_iterator lef
 		left++;
 	}
 
-	return right;
+	return right; 
 }
 
 OpIt FindOperator(string::const_iterator & left, string::const_iterator & right)
 {
 	// check if number first?
+
+	if (*left == '-')
+		return OpIt(left, left + 1);
+
 	auto tempLeft = left;
 
 	if (*left == '(')
@@ -188,16 +212,22 @@ OpIt FindOperator(string::const_iterator & left, string::const_iterator & right)
 	if (opBeforeParentheses.begOp != right) return opBeforeParentheses;
 
 	auto unaryOPP = begin(unaryOps);
+
 	auto s = string(left, firstParentheses);
 	size_t pos;
 
 	// unary operators
-	do
+	/*do
 	{
 		pos = s.find(*unaryOPP);
-	} while (pos == string::npos && ++unaryOPP != end(unaryOps));
+	} while (pos == string::npos && ++unaryOPP != end(unaryOps));*/
 
-	if (pos != string::npos) return OpIt(left + pos, left + pos + size(*unaryOPP));
+	if (mapUnaryOper.count(s) > 0)
+	{
+		return OpIt(left, left + (firstParentheses - left));
+	}
+
+	//if (pos != string::npos) return OpIt(left + pos, left + pos + size(*unaryOPP));
 
 	return OpIt(right, right);
 }
@@ -208,7 +238,7 @@ LMR FindLMR(string::const_iterator left, string::const_iterator right)
 	string::iterator opPos;
 	auto tempLeft = left;
 
-	while (hasOuterParentheses && *left == '(' && *(right - 1) == ')')
+	while (hasOuterParentheses && *left == '(' && right - left > 1)
 	{
 		tempLeft = left;
 		int parenthesesDepth = 0;
@@ -349,10 +379,34 @@ double EvalTree(Node* const &node)
 			return -EvalTree(node->leftChild);
 		case Oper::Sin:
 			return sin(EvalTree(node->leftChild));
+		case Oper::Asin:
+			return asin(EvalTree(node->leftChild));
+		case Oper::Sinh:
+			return sinh(EvalTree(node->leftChild));
+		case Oper::Asinh:
+			return asinh(EvalTree(node->leftChild));
 		case Oper::Cos:
 			return cos(EvalTree(node->leftChild));
+		case Oper::Acos:
+			return acos(EvalTree(node->leftChild));
+		case Oper::Cosh:
+			return cosh(EvalTree(node->leftChild));
+		case Oper::Acosh:
+			return acos(EvalTree(node->leftChild));
 		case Oper::Tan:
 			return tan(EvalTree(node->leftChild));
+		case Oper::Atan:
+			return atan(EvalTree(node->leftChild));
+		case Oper::Tanh:
+			return tanh(EvalTree(node->leftChild));
+		case Oper::Atanh:
+			return atanh(EvalTree(node->leftChild));
+		case Oper::Log:
+			return log(EvalTree(node->leftChild));
+		case Oper::Log10:
+			return log10(EvalTree(node->leftChild));
+		case Oper::Sqrt:
+			return sqrt(EvalTree(node->leftChild));
 		default:
 			break;
 		}

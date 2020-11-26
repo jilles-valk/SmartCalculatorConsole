@@ -6,7 +6,7 @@
 #include <vector>
 #include <unordered_map>
 
-enum class Oper {None, Times, DevidedBy, Power, Plus, Negative, Sin, Cos, Tan};
+enum class Oper {None, Times, DevidedBy, Power, Plus, Negative, Sin, Asin, Sinh, Asinh, Cos, Acos, Cosh, Acosh, Tan, Atan, Tanh, Atanh, Log, Log10, Sqrt};
 
 class Node
 {
