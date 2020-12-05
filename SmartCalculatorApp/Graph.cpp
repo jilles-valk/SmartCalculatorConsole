@@ -13,6 +13,8 @@ Graph::Graph(wxFrame* parent) : wxScrolledCanvas(parent, wxID_ANY)
 	Bind(wxEVT_MOUSEWHEEL, &Graph::OnZoom, this);
 	Bind(wxEVT_MOTION, &Graph::OnMove, this);
 	Bind(wxEVT_LEFT_DOWN, &Graph::OnLeftDown, this);
+
+	SetBackgroundStyle(wxBG_STYLE_PAINT);
 }
 void Graph::SetGraph(std::vector<std::pair<double, double>> graph)
 {
@@ -21,7 +23,7 @@ void Graph::SetGraph(std::vector<std::pair<double, double>> graph)
 
 void Graph::GenerateFunction(Tree t)
 {
-	function = Function(t, canvasWidth);
+	function = Function(t, this->GetSize().x);
 	function.MakeGraph();
 	this->Refresh(false);
 }
@@ -37,12 +39,6 @@ void Graph::DrawGraph(wxDC& dc)
 
 	std::vector<Point>::const_iterator begin = std::cbegin(function.graph);
 	std::vector<Point>::const_iterator end = std::cend(function.graph);
-
-	double translateX = (canvasWidth / (function.lowerRight.x - function.upperLeft.x));
-	double translateY = -(canvasHeight / (function.lowerRight.y - function.upperLeft.y));
-
-	double shiftX = 0.5 * canvasWidth;
-	double shiftY = 0.5 * canvasHeight;
 
 	if (begin != end) {
 		for (auto curr = begin, next = std::next(begin); next != end; curr++, next++) 
@@ -91,12 +87,11 @@ void Graph::OnMove(wxMouseEvent& evt)
 	{
 		Point moveV = ScreenToFunctionCoord(clickPos) - ScreenToFunctionCoord(evt.GetPosition());
 
-		function.upperLeft = function.upperLeft + moveV;
-		function.lowerRight = function.lowerRight + moveV;
+		function.SetBounds(function.upperLeft + moveV, function.lowerRight + moveV);
 
 		clickPos = evt.GetPosition();
-		function.MakeGraph();
-		Refresh();
+
+		Refresh(false);
 	}
 
 	evt.Skip();
@@ -104,7 +99,7 @@ void Graph::OnMove(wxMouseEvent& evt)
 
 void Graph::OnPaint(wxPaintEvent& evt)
 {
-	wxBufferedPaintDC dc(this);
+	wxAutoBufferedPaintDC dc(this);
 	this->PrepareDC(dc);
 	this->OnDraw(dc);
 }
@@ -113,9 +108,10 @@ void Graph::OnResize(wxSizeEvent& evt)
 {
 	canvasWidth = evt.GetSize().x;
 	canvasHeight = evt.GetSize().y;
-	function.numPoints = canvasWidth;
+	function.SetWidth(canvasWidth);
+
 	function.MakeGraph();
-	Refresh();
+	Refresh(false);
 	evt.Skip();
 }
 
@@ -126,16 +122,13 @@ void Graph::OnZoom(wxMouseEvent& evt)
 
 	if (zoomAmount < 0)
 	{
-		zoomAmount = -1/(10 * (1 + zoomAmount));
+		zoomAmount = zoomAmount / (1 + zoomAmount);
 	}
 
-	Point tempUpperLeft = function.upperLeft + (mousePos - function.upperLeft) * zoomAmount;
-	function.lowerRight = function.lowerRight + (mousePos - function.lowerRight) * zoomAmount;
+	function.SetBounds(function.upperLeft + (mousePos - function.upperLeft) * zoomAmount, 
+		function.lowerRight + (mousePos - function.lowerRight) * zoomAmount);
 
-	function.upperLeft = tempUpperLeft;
-
-	function.MakeGraph();
-	Refresh();
+	Refresh(false);
 	evt.Skip();
 }
 

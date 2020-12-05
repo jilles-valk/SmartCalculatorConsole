@@ -8,11 +8,7 @@
 
 using namespace std;
 
-static regex const binaryOperatorRe("[\\+\\*\\/\\^]");
-static regex const unaryOperatorRe("-|sin|asin|sinh|asinh|cos|acos|cosh|acosh|tan|atan|tanh|atanh|log|log10|sqrt");
-
 static vector<char> const opOrder{ '+', '*', '/', '^' };
-static vector<string> const unaryOps{"-", "sin", "asin", "sinh", "asinh", "cos", "acos", "cosh", "acosh", "tan", "atan", "tanh", "atanh", "log", "log10", "sqrt" };
 static unordered_map<string, Oper> const mapUnaryOper = {
 	{ "-", Oper::Negative },
 	{ "sin", Oper::Sin },
@@ -35,7 +31,6 @@ static unordered_map<string, Oper> const mapBinaryOper = {
 	{ "/", Oper::DevidedBy }, 
 	{"^", Oper::Power }, 
 	{"+", Oper::Plus } };
-
 
 
 struct OpIt
@@ -211,23 +206,13 @@ OpIt FindOperator(string::const_iterator & left, string::const_iterator & right)
 
 	if (opBeforeParentheses.begOp != right) return opBeforeParentheses;
 
-	auto unaryOPP = begin(unaryOps);
-
-	auto s = string(left, firstParentheses);
-	size_t pos;
-
 	// unary operators
-	/*do
-	{
-		pos = s.find(*unaryOPP);
-	} while (pos == string::npos && ++unaryOPP != end(unaryOps));*/
+	auto s = string(left, firstParentheses);
 
 	if (mapUnaryOper.count(s) > 0)
 	{
 		return OpIt(left, left + (firstParentheses - left));
 	}
-
-	//if (pos != string::npos) return OpIt(left + pos, left + pos + size(*unaryOPP));
 
 	return OpIt(right, right);
 }

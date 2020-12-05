@@ -21,17 +21,25 @@ public:
 	std::vector<Point> graph;
 	Point upperLeft;
 	Point lowerRight;
-	unsigned int numPoints = 1000;
 	std::string varName;
 
 	Function() = default;
-	Function(Tree tree) : tree{ tree }, upperLeft{ -10, 10 }, lowerRight{ 10, -10 },  varName{ "x" } {};
-	Function(Tree tree, size_t numPoints) : tree{ tree }, upperLeft{ -10, 10 }, lowerRight{ 10, -10 }, numPoints{ numPoints }, varName{ "x" } {};
-	
-	
+	Function(Tree tree) : tree{ tree }, upperLeft{ -10, 10 }, lowerRight{ 10, -10 }, minX{ -10 }, maxX{ 10 }, varName{ "x" } {};
+	Function(Tree tree, size_t numPoints) : tree{ tree }, upperLeft{ -10, 10 }, lowerRight{ 10, -10 }, minX{ -10 }, maxX{ 10 }, varName{ "x" } { SetWidth(numPoints); };
+	Function& operator=(Function f);
+
 	bool GetMinMax();
 	bool SetAutoView();
 	bool MakeGraph();
+	void SetBounds(Point uLeft, Point lRight);
+	void SetWidth(int numPixels);
+
+private:
+	double minX;
+	double maxX;
+	unsigned int numPoints = 1000;
+	double const reduceScale = 0.3;
+	double const increaseScale = reduceScale / (1 - reduceScale);
 
 };
 
