@@ -25,7 +25,7 @@ public:
 
 	Function() = default;
 	Function(Tree tree) : tree{ tree }, upperLeft{ -10, 10 }, lowerRight{ 10, -10 }, minX{ -10 }, maxX{ 10 }, varName{ "x" } {};
-	Function(Tree tree, size_t numPoints) : tree{ tree }, upperLeft{ -10, 10 }, lowerRight{ 10, -10 }, minX{ -10 }, maxX{ 10 }, varName{ "x" } { SetWidth(numPoints); };
+	Function(Tree tree, std::string varName, size_t numPoints) : tree{ tree }, upperLeft{ -10, 10 }, lowerRight{ 10, -10 }, minX{ -10 }, maxX{ 10 }, varName{ varName } { SetWidth(numPoints); };
 	Function& operator=(Function f);
 
 	bool GetMinMax();

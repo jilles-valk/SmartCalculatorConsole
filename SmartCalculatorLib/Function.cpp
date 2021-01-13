@@ -1,4 +1,6 @@
 #include "Function.h"
+#include <algorithm>
+#include <execution>
 
 Function& Function::operator=(Function f)
 {
@@ -71,17 +73,16 @@ void Function::SetWidth(int numPixels)
 bool Function::MakeGraph()
 {
 	double dx = (maxX - minX)/(numPoints - 1);
-	double x = minX;
 
 	graph.clear();
-	graph.reserve(numPoints);
+	graph.resize(numPoints);
 
-	for (int i = 0; i < numPoints; i++)
-	{
-		tree.SetVariable(std::pair<std::string, double>{varName, x});
-		graph.push_back(Point(x, tree.Eval()));
+	std::for_each(std::execution::seq, begin(graph), end(graph), [tree = tree, varName = varName, x = minX, &dx](Point& p) mutable {
+		tree.SetVariable(std::make_pair(varName, x));
 
+		p = Point(x, tree.Eval());
 		x += dx;
-	}
+		});
+
 	return true;
 }

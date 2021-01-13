@@ -27,6 +27,7 @@ public:
 	int GetStartIndexException();
 	int GetEndIndexException();
 	bool IsFunction();
+	std::string GetVaryingVariableName();
 	bool GetVariables();
 	bool SetVariables(std::unordered_map<std::string, double> variables);
 	bool SetVariable(std::pair<std::string, double> var);

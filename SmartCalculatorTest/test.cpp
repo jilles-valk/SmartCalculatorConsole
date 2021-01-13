@@ -97,42 +97,6 @@ TEST(BuildTreeTest, HandlesBuildingCosTreeBinaryBehind) {
 	EXPECT_EQ(lc->value, Oper::Cos);
 }
 
-TEST_F(BasicOperatorEvalTest, HandlesAddition)
-{
-	auto result = EvalTree(addOneTwo.get());
-	EXPECT_DOUBLE_EQ(result, 3);
-}
-
-TEST_F(BasicOperatorEvalTest, HandlesSubtraction)
-{
-	auto result = EvalTree(minusTwoThree.get());
-	EXPECT_DOUBLE_EQ(result, -1);
-}
-
-TEST_F(BasicOperatorEvalTest, HandlesMultiply)
-{
-	auto result = EvalTree(timesTwoThree.get());
-	EXPECT_DOUBLE_EQ(result, 6);
-}
-
-TEST_F(BasicOperatorEvalTest, HandlesDevide)
-{
-	auto result = EvalTree(devideSixThree.get());
-	EXPECT_DOUBLE_EQ(result, 2);
-}
-
-TEST_F(BasicOperatorEvalTest, HandlesPower)
-{
-	auto result = EvalTree(powerTwoThree.get());
-	EXPECT_DOUBLE_EQ(result, 16);
-}
-
-TEST_F(BasicOperatorEvalTest, HandlesSin)
-{
-	auto result = EvalTree(sinHalfPi.get());
-	EXPECT_DOUBLE_EQ(result, 1);
-}
-
 TEST(ParenthesesTreeBuildingTest, HandlesSinglePointlessParentheses)
 {
 	Tree tree = Tree("(1-2)");
@@ -315,6 +279,15 @@ TEST(BuildFunctionTreeTest, GetMultipleVariables)
 	EXPECT_EQ(var->value, "z");
 }
 
+TEST(BuildFunctionTreeTest, GetVaryingVariable)
+{
+	Tree tree = Tree("aa+ab+ac+aab");
+	tree.Build();
+	ASSERT_TRUE(tree.GetVariables());
+
+	EXPECT_EQ(tree.GetVaryingVariableName(), "ac");
+}
+
 TEST(SetFunctionTreeTest, SetOneVariable)
 {
 	Tree tree = Tree("2*x^2+3*x-5");
@@ -386,3 +359,4 @@ TEST(GraphingTest, PlotDefaultView)
 	EXPECT_DOUBLE_EQ(f.graph[f.graph.size() - 1].x, 10);
 	EXPECT_DOUBLE_EQ(f.graph[f.graph.size() - 1].y, 20);
 }
+

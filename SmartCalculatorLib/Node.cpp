@@ -121,9 +121,6 @@ OpIt FindOperator(string::const_iterator & left, string::const_iterator & right)
 {
 	// check if number first?
 
-	if (*left == '-')
-		return OpIt(left, left + 1);
-
 	auto tempLeft = left;
 
 	if (*left == '(')
@@ -207,6 +204,9 @@ OpIt FindOperator(string::const_iterator & left, string::const_iterator & right)
 	if (opBeforeParentheses.begOp != right) return opBeforeParentheses;
 
 	// unary operators
+	if (*left == '-')
+		return OpIt(left, left + 1);
+
 	auto s = string(left, firstParentheses);
 
 	if (mapUnaryOper.count(s) > 0)

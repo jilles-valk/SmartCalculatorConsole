@@ -20,7 +20,7 @@ void Tree::Build()
 	{
 		trunk = BuildTree(parsedInput);
 
-		this->GetVariables();
+		GetVariables();
 	}
 	catch(TreeBuildingException e)
 	{
@@ -47,6 +47,20 @@ int Tree::GetEndIndexException()
 bool Tree::IsFunction()
 {
 	return trunk.get()->HasVariableNode();
+}
+
+std::string Tree::GetVaryingVariableName()
+{
+	std::string maxVar;
+	for (auto const& var : variables)
+	{
+		if (maxVar.compare(var.first) < 0)
+		{
+			maxVar = var.first;
+		}
+	}
+	
+	return maxVar;
 }
 
 bool Tree::GetVariables()

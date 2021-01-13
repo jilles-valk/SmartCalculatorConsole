@@ -23,7 +23,7 @@ void Graph::SetGraph(std::vector<std::pair<double, double>> graph)
 
 void Graph::GenerateFunction(Tree t)
 {
-	function = Function(t, this->GetSize().x);
+	function = Function(t, t.GetVaryingVariableName(), this->GetSize().x);
 	function.MakeGraph();
 	this->Refresh(false);
 }
