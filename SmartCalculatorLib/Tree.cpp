@@ -20,7 +20,10 @@ void Tree::Build()
 	{
 		trunk = BuildTree(parsedInput);
 
-		GetVariables();
+		if (!GetVariables())
+		{
+			GetMostLikelyVarying();
+		}
 	}
 	catch(TreeBuildingException e)
 	{
@@ -67,6 +70,14 @@ bool Tree::GetVariables()
 {
 	std::unordered_map<std::string, std::vector<Node**>> input;
 	variables = trunk.get()->GetVariableChildNodes(input);
+
+	return !variables.empty();
+}
+
+bool Tree::GetMostLikelyVarying()
+{
+	auto [name, n, depth] = trunk.get()->GetMostLikelyVarying(0);
+	variables.insert(std::make_pair(name, std::vector<Node**>{ n }));
 
 	return !variables.empty();
 }

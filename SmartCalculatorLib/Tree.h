@@ -28,11 +28,13 @@ public:
 	int GetEndIndexException();
 	bool IsFunction();
 	std::string GetVaryingVariableName();
+	bool GetMostLikelyVarying();
 	bool GetVariables();
 	bool SetVariables(std::unordered_map<std::string, double> variables);
 	bool SetVariable(std::pair<std::string, double> var);
 
 private:
 	void ParseInput(std::string const & input);
+	
 };
 

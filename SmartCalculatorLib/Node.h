@@ -25,6 +25,7 @@ public:
 
 	bool HasVariableNode();
 	std::unordered_map<std::string, std::vector<Node**>> GetVariableChildNodes(std::unordered_map<std::string, std::vector<Node**>>& vars);
+	std::tuple<std::string, std::vector<Node**>, int> GetMostLikelyVarying(int depth);
 
 	virtual void dummy() {}
 };

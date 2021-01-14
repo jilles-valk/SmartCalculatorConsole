@@ -288,6 +288,17 @@ TEST(BuildFunctionTreeTest, GetVaryingVariable)
 	EXPECT_EQ(tree.GetVaryingVariableName(), "ac");
 }
 
+TEST(BuildFunctionTreeTest, GetMostLikelyVarying)
+{
+	Tree tree = Tree("sqrt(1+2*3)");
+	tree.Build();
+
+	auto var = dynamic_cast<TNode<double>*>(*tree.variables["default"][0]);
+
+	ASSERT_TRUE(var != NULL);
+	EXPECT_DOUBLE_EQ(var->value, 3);
+}
+
 TEST(SetFunctionTreeTest, SetOneVariable)
 {
 	Tree tree = Tree("2*x^2+3*x-5");
@@ -359,4 +370,5 @@ TEST(GraphingTest, PlotDefaultView)
 	EXPECT_DOUBLE_EQ(f.graph[f.graph.size() - 1].x, 10);
 	EXPECT_DOUBLE_EQ(f.graph[f.graph.size() - 1].y, 20);
 }
+
 

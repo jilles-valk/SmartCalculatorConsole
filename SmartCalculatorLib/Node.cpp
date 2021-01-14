@@ -475,3 +475,36 @@ std::unordered_map<std::string, std::vector<Node**>> Node::GetVariableChildNodes
 	return vars;
 }
 
+std::tuple<std::string, std::vector<Node**>, int> Node::GetMostLikelyVarying(int depth)
+{
+	auto nodeVal = dynamic_cast<TNode<double>*>(leftChild);
+	std::tuple < std::string, std::vector<Node**>, int> leftVar = std::make_tuple("none", vector<Node**>{ }, -1);
+	std::tuple < std::string, std::vector<Node**>, int> rightVar = leftVar;
+
+	if (nodeVal != NULL)
+	{
+		leftVar = std::make_tuple("default", vector<Node**>{ &leftChild }, depth);
+	}
+
+	nodeVal = dynamic_cast<TNode<double>*>(rightChild);
+
+	if (nodeVal != NULL)
+	{
+		rightVar = std::make_tuple("default", vector<Node**>{ &rightChild }, depth);
+	}
+
+	if (std::get<0>(leftVar)== "none" && leftChild != nullptr)
+	{
+		leftVar = leftChild->GetMostLikelyVarying(depth + 1);
+	}
+
+	if (std::get<0>(rightVar) == "none" && rightChild != nullptr)
+	{
+		rightVar = rightChild->GetMostLikelyVarying(depth + 1);
+	}
+
+	if (std::get<2>(leftVar) > std::get<2>(rightVar))
+		return leftVar;
+	
+	return rightVar;
+}
