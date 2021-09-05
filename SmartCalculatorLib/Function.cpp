@@ -13,6 +13,7 @@ Function& Function::operator=(Function f)
 	lowerRight = f.lowerRight;
 	upperLeft = f.upperLeft;
 	varName = f.varName;
+	initialVarValue = f.initialVarValue;
 
 	return *this;
 }
@@ -83,6 +84,9 @@ bool Function::MakeGraph()
 		p = Point(x, tree.Eval());
 		x += dx;
 		});
+
+	//reset the variable to get proper result of expression
+	tree.SetVariable(std::make_pair(varName, initialVarValue));
 
 	return true;
 }

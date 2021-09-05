@@ -8,6 +8,8 @@
 
 enum class Oper {None, Times, DevidedBy, Power, Plus, Negative, Sin, Asin, Sinh, Asinh, Cos, Acos, Cosh, Acosh, Tan, Atan, Tanh, Atanh, Log, Log10, Sqrt};
 
+enum class Constant {pi, e};
+
 class Node
 {
 public:

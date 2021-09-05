@@ -31,6 +31,9 @@ static unordered_map<string, Oper> const mapBinaryOper = {
 	{ "/", Oper::DevidedBy }, 
 	{"^", Oper::Power }, 
 	{"+", Oper::Plus } };
+static unordered_map<string, Constant> const mapConstant = {
+	{ "pi", Constant::pi },
+	{"e", Constant::e}};
 
 
 struct OpIt
@@ -266,7 +269,7 @@ Node* BuildTreeRecursive(LMR const & lmr)
 {
 	string sVal;
 
-	// numeric value or variable
+	// numeric value, constant or variable
 	if (lmr.middle.begOp == lmr.right)
 	{
 		char* p;
@@ -279,6 +282,12 @@ Node* BuildTreeRecursive(LMR const & lmr)
 		}
 		else if (mapUnaryOper.count(sVal) == 0 && std::all_of(lmr.left, lmr.right, [](char const & c) {return isalpha(c); }))
 		{
+			std::transform(sVal.begin(), sVal.end(), sVal.begin(), [](unsigned char c) { return std::tolower(c); });
+
+			if (mapConstant.count(sVal) > 0)
+			{
+				return new TNode<Constant>(mapConstant.at(sVal), nullptr, nullptr);
+			}
 			return new TNode<string>(sVal, nullptr, nullptr);
 		}
 		else
@@ -392,6 +401,21 @@ double EvalTree(Node* const &node)
 			return log10(EvalTree(node->leftChild));
 		case Oper::Sqrt:
 			return sqrt(EvalTree(node->leftChild));
+		default:
+			break;
+		}
+	}
+
+	auto con = dynamic_cast<TNode<Constant>*>(node);
+
+	if (con != NULL)
+	{
+		switch (con->GetValue())
+		{
+		case Constant::pi:
+			return M_PI;
+		case Constant::e:
+			return M_E;
 		default:
 			break;
 		}
